@@ -8,9 +8,9 @@
 	-->
 	
 	<!-- DESCRIPTION ::= -->
-		<name>Xilinc</name>
+		<name>Xilinx</name>
 		<info>
-			<h1>Xilinc Zynq-7000 SoC</h1>
+			<h1>Xilinx Zynq-7000 SoC</h1>
 			<p>This script supports the WCET computation for the Zynq-7000 SoC
 			from Xilinx for the description below.</p>
 		</info>
@@ -23,7 +23,7 @@
 			<mach>Zynq-7000</mach>
 		</id>
 	
-	<!-- PLATFORM :: -->
+	<!-- PLATFORM ::= -->
 	<platform>
 		<xi:include href="zynq-7000/pipeline.xml"/>
 		<xi:include href="zynq-7000/cache.xml"/>
