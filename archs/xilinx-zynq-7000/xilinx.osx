@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF8"?>
+<otawa-script
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	
+	<!-- 	DOCUMENTATION
+		https://docs.xilinx.com/v/u/en-US/ds190-Zynq-7000-Overview
+	-->
+	
+	<!-- DESCRIPTION ::= -->
+		<name>Xilinc</name>
+		<info>
+			<h1>Xilinc Zynq-7000 SoC</h1>
+			<p>This script supports the WCET computation for the Zynq-7000 SoC
+			from Xilinx for the description below.</p>
+		</info>
+		<path to="zynq-7000"/>*
+		
+	<!-- IDENTIFICATION ::= -->
+		<id>
+			<arch>Xilinx SoC</arch>
+			<abi>elf</abi>
+			<mach>Zynq-7000</mach>
+		</id>
+	
+	<!-- PLATFORM :: -->
+	<platform>
+		<xi:include href="zynq-7000/pipeline.xml"/>
+		<xi:include href="zynq-7000/cache.xml"/>
+		<xi:include href="zynq-7000/memory.xml"/>
+		<xi:include href="zynq-7000/bht.xml"/>
+	</platform>
+</otawa-script>

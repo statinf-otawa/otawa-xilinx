@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bht class="otawa::hard::BHT">
+    <!-- DOCUMENTATION
+        https://users.ece.utexas.edu/~mcdermot/arch/articles/Zynq/ug585-Zynq-7000-TRM.pdf
+        https://developer.arm.com/documentation/100511/0401/functional-description/about-the-functions/dynamic-branch-prediction?lang=en
+	-->
+    <block_bits>8</block_bits>
+    <row_bits>1</row_bits>
+    <way_bits>1</way_bits>
+  </bht>  
