@@ -8,4 +8,7 @@
     <block_bits>7</block_bits>
     <row_bits>1</row_bits>
     <way_bits>1</way_bits>
+    <cond_penalty>11</cond_penalty>
+    <indirect_penalty>11</indirect_penalty>
+    <cond_indirect_penalty>11</cond_indirect_penalty>
   </bht>  
