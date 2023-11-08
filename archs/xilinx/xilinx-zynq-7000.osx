@@ -18,7 +18,7 @@
 		
 	<!-- IDENTIFICATION ::= -->
 		<id>
-			<arch>Xilinx SoC</arch>
+			<arch>armv7-a</arch>
 			<abi>elf</abi>
 			<mach>Zynq-7000</mach>
 		</id>
@@ -30,4 +30,9 @@
 		<xi:include href="zynq-7000/memory.xml"/>
 		<xi:include href="zynq-7000/bht.xml"/>
 	</platform>
+
+	<!-- SCRIPT ::= -->
+	<script>
+		<step require="otawa::ipet::WCET_FEATURE"/>	
+	</script>
 </otawa-script>

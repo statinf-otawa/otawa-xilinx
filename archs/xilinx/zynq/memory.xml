@@ -4,6 +4,7 @@
     <!-- DOCUMENTATION
 		https://docs.xilinx.com/r/en-US/am011-versal-acap-trm/States?tocId=GE0VLeFxsGZJjgNsLJxNjg
         https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
+        https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping
 	-->
     <banks>
         <bank>

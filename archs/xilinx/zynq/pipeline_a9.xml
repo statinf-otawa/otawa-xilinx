@@ -7,7 +7,7 @@
 	<!-- DOCUMENTATION
 		https://documentation-service.arm.com/static/5e8e2ab9fd977155116a7035?token=
 	-->
-	<arch>Xilinx SoC</arch>
+	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
 	<frequency>1000000000</frequency>
 </processor>
