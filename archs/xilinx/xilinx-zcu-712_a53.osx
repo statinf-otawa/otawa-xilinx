@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF8"?>
+<otawa-script
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	
+	<!-- 	DOCUMENTATION
+		https://www.xilinx.com/content/dam/xilinx/imgs/products/zynq/zynq-ev-block.PNG
+		https://www.mouser.fr/datasheet/2/903/ug1182_zcu102_eval_bd-1596125.pdf
+	-->
+	
+	<!-- DESCRIPTION ::= -->
+		<name>Xilinx</name>
+		<info>
+			<h1>Xilinx Zcu-712 MPSoC -- Cortex A53 Application Processing Unit</h1>
+			<p>This script supports the WCET computation for the cortex A53 APU of Zynq UltraScale+ MPSoC
+			from Xilinx for the description below.</p>
+		</info>
+		<path to="zcu-712-a53"/>*
+		
+	<!-- IDENTIFICATION ::= -->
+		<id>
+			<arch>armv8-a</arch>
+			<abi>elf</abi>
+			<mach>Zcu-712 SoC, Arm cortex A53</mach>
+		</id>
+	
+	<!-- PLATFORM ::= -->
+	<platform>
+		<xi:include href="zynq/pipeline_a53.xml"/>
+		<xi:include href="zynq/cache_a53.xml"/>
+		<xi:include href="zynq/memory.xml"/>
+		<xi:include href="zynq/bht_a53.xml"/>
+	</platform>
+
+	<!-- SCRIPT ::= -->
+	<script>
+		<step require="otawa::ipet::WCET_FEATURE"/>	
+	</script>
+</otawa-script>
