@@ -10,5 +10,5 @@
 	-->
 	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
-	<frequency>667000000</frequency> <!-- CPU frequency: Up to 667 MHz -->
+	<frequency>1000000000</frequency> <!-- CPU frequency: Up to 667 MHz -->
 </processor>
