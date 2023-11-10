@@ -5,9 +5,10 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	
 	<!-- DOCUMENTATION
+		https://docs.xilinx.com/v/u/en-US/ds188-XA-Zynq-7000-Overview
 		https://documentation-service.arm.com/static/5e8e2ab9fd977155116a7035?token=
 	-->
 	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
-	<frequency>1000000000</frequency>
+	<frequency>667000000</frequency> <!-- CPU frequency: Up to 667 MHz -->
 </processor>

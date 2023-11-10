@@ -25,10 +25,10 @@
 	
 	<!-- PLATFORM ::= -->
 	<platform>
-		<xi:include href="zynq-7000/pipeline.xml"/>
-		<xi:include href="zynq-7000/cache.xml"/>
-		<xi:include href="zynq-7000/memory.xml"/>
-		<xi:include href="zynq-7000/bht.xml"/>
+		<xi:include href="zynq/pipeline_a9.xml"/>
+		<xi:include href="zynq/cache_a9.xml"/>
+		<xi:include href="zynq/memory.xml"/>
+		<xi:include href="zynq/bht_a9.xml"/>
 	</platform>
 
 	<!-- SCRIPT ::= -->
