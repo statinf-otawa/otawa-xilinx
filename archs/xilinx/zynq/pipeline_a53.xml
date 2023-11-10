@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- superscalar, variable length, out-of-order pipeline with dynamic branch prediction /-->
+<processor class="otawa::hard::Processor"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	
+	<!-- DOCUMENTATION
+		https://documentation-service.arm.com/static/5e8e2ab9fd977155116a7035?token=
+	-->
+	<arch>armv8-a</arch>
+	<model>Zynq UltraScale+™ MPSoC</model>
+	<frequency>1500000000</frequency>
+	<!-- TODO -->
+</processor>
