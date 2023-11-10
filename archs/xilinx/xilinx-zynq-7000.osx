@@ -14,7 +14,7 @@
 			<p>This script supports the WCET computation for the Zynq-7000 SoC
 			from Xilinx for the description below.</p>
 		</info>
-		<path to="zynq-7000"/>*
+		<path to="zynq"/>*
 		
 	<!-- IDENTIFICATION ::= -->
 		<id>

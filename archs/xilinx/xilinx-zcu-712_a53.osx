@@ -15,13 +15,13 @@
 			<p>This script supports the WCET computation for the cortex A53 APU of Zynq UltraScale+ MPSoC
 			from Xilinx for the description below.</p>
 		</info>
-		<path to="zcu-712-a53"/>*
+		<path to="zynq"/>*
 		
 	<!-- IDENTIFICATION ::= -->
 		<id>
 			<arch>armv8-a</arch>
 			<abi>elf</abi>
-			<mach>Zcu-712 SoC, Arm cortex A53</mach>
+			<mach>Zynq UltraScale+ MPSoC, Arm cortex A53</mach>
 		</id>
 	
 	<!-- PLATFORM ::= -->
