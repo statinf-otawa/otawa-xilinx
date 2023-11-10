@@ -28,7 +28,6 @@
 		<xi:include href="zynq/pipeline_r5f.xml"/>
 		<xi:include href="zynq/cache_r5f.xml"/>
 		<xi:include href="zynq/memory.xml"/>
-		<xi:include href="zynq/bht_r5f.xml"/>
 	</platform>
 
 	<!-- SCRIPT ::= -->

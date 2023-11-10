@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- superscalar, variable length, out-of-order pipeline with dynamic branch prediction /-->
+<processor class="otawa::hard::Processor"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	
+	<!-- DOCUMENTATION
+		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview
+	-->
+	<arch>armv7-a</arch>
+	<model>Zynq UltraScale+™ MPSoC</model>
+	<frequency>600000000</frequency> <!-- CPU frequency: Up to 667 MHz -->
+</processor>
