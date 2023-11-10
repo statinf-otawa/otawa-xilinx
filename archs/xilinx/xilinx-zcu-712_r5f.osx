@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF8"?>
+<otawa-script
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	
+	<!-- 	DOCUMENTATION
+		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview
+	-->
+	
+	<!-- DESCRIPTION ::= -->
+		<name>Xilinx</name>
+		<info>
+			<h1>Xilinx Zcu-712 MPSoC -- Cortex R5F Real-Time Processing Unit</h1>
+			<p>This script supports the WCET computation for the cortex R5F RPU of Zynq UltraScale+ MPSoC
+			from Xilinx for the description below.</p>
+		</info>
+		<path to="zynq"/>*
+		
+	<!-- IDENTIFICATION ::= -->
+		<id>
+			<arch>armv7-r</arch>
+			<abi>elf</abi>
+			<mach>Zynq UltraScale+ MPSoC, Arm cortex R5F</mach>
+		</id>
+	
+	<!-- PLATFORM ::= -->
+	<platform>
+		<xi:include href="zynq/pipeline_r5f.xml"/>
+		<xi:include href="zynq/cache_r5f.xml"/>
+		<xi:include href="zynq/memory.xml"/>
+		<xi:include href="zynq/bht_r5f.xml"/>
+	</platform>
+
+	<!-- SCRIPT ::= -->
+	<script>
+		<step require="otawa::ipet::WCET_FEATURE"/>	
+	</script>
+</otawa-script>
