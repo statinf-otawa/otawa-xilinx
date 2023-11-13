@@ -5,10 +5,86 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	
 	<!-- DOCUMENTATION
-		https://docs.xilinx.com/v/u/en-US/ds188-XA-Zynq-7000-Overview
+		https://www.digikey.fr/fr/htmldatasheets/production/2108336/0/0/1/xc7z010-1cl225i
 		https://documentation-service.arm.com/static/5e8e2ab9fd977155116a7035?token=
+		https://www.geeksforgeeks.org/pipelining-in-arm/
+		https://documentation-service.arm.com/static/5e8e2ab9fd977155116a7035?token=
+		https://documentation-service.arm.com/static/5e8e13b4fd977155116a35eb?token=
+		https://documentation-service.arm.com/static/5e8e176afd977155116a3c45?token=
+		https://documentation-service.arm.com/static/5f0370fccafe527e86f5bfb2?token=
 	-->
 	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
-	<frequency>1000000000</frequency> <!-- CPU frequency: Up to 667 MHz -->
+	<frequency>1000000000</frequency> <!-- CPU frequency: Up to 1 GHz -->
+	<stages>
+		<stage id="FE">
+			<name>Fetch</name>
+			<width>1</width>
+			<type>FETCH</type>
+		</stage>
+		<stage id="DE">
+			<name>Decode</name>
+			<width>2</width>
+			<type>LAZY</type>
+			<latency>2</latency>
+		</stage>
+		<stage id="REGR"> <!-- Register rename stage -->
+			<name>RegR</name>
+			<width>2</width> <!-- I'm not confident about this -->
+			<type>LAZY</type>
+		</stage>
+		<stage id="DIS"> <!-- Dispatch stage -->
+			<name>DISPATCH</name>
+			<width>3</width> <!-- I'm not confident about this. Maybe 4-->
+			<type>LAZY</type>
+		</stage>
+		<stage id="EXE">
+			<name>EXE</name>
+			<type>EXEC</type>
+			<fus>
+				<fu id="EXEC_F"> <!-- FPU -->
+					<name>EXEC_F</name>
+					<width>1</width>
+					<latency>32</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_NEON"> <!-- NEON -->
+					<name>EXEC_NEON</name>
+					<width>1</width>
+					<latency>5</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_MUL"> <!-- MUL -->
+					<name>EXEC_MUL</name>
+					<width>1</width>
+					<latency>3</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_ALU"> <!-- ALU -->
+					<name>EXEC_ALU</name>
+					<width>2</width>
+					<latency>3</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
+					<name>EXEC_LDST</name>
+					<width>1</width>
+					<latency>9</latency>
+					<pipelined>true</pipelined>
+				</fu>
+			</fus>
+			<dispatch>
+				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
+				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
+				<inst> <type>IS_MUL</type> <fu ref="EXEC_MUL"/> </inst>
+				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_NEON"/> </inst>
+				<inst> <type></type> <fu ref="EXEC_ALU"/> </inst>
+			</dispatch>
+		</stage>
+		<stage id="WB"> <!-- Write back stage-->
+			<name>WB</name>
+			<width>1</width>
+			<type>COMMIT</type>
+		</stage>
+	</stages>
 </processor>
