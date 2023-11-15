@@ -5,10 +5,67 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	
 	<!-- DOCUMENTATION
-		https://documentation-service.arm.com/static/5e8e2ab9fd977155116a7035?token=
+		https://www.xilinx.com/content/dam/xilinx/imgs/products/zynq/zynq-ev-block.PNG
+		https://www.anandtech.com/show/11441/dynamiq-and-arms-new-cpus-cortex-a75-a55/4
 	-->
 	<arch>armv8-a</arch>
 	<model>Zynq UltraScale+™ MPSoC</model>
 	<frequency>1500000000</frequency>
-	<!-- TODO -->
+	<stages>
+		<stage id="FE">
+			<name>Fetch</name>
+			<width>1</width>
+			<type>FETCH</type>
+		</stage>
+		<stage id="DE">
+			<name>Decode</name>
+			<width>2</width>
+			<type>LAZY</type>
+		</stage>
+		<stage id="ISS"> <!-- Issue stage -->
+			<name>ISSUE</name>
+			<type>LAZY</type>
+		</stage>
+		<stage id="EXE">
+			<name>EXE</name>
+			<type>EXEC</type>
+			<fus>
+				<fu id="EXEC_F"> <!-- FPU -->
+					<name>EXEC_F</name>
+					<width>1</width>
+					<latency>32</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_NEON"> <!-- NEON -->
+					<name>EXEC_NEON</name>
+					<width>1</width>
+					<latency>5</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_ALU"> <!-- ALU -->
+					<name>EXEC_ALU</name>
+					<width>2</width>
+					<latency>3</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
+					<name>EXEC_LDST</name>
+					<width>1</width>
+					<latency>9</latency>
+					<pipelined>true</pipelined>
+				</fu>
+			</fus>
+			<dispatch>
+				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
+				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
+				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_NEON"/> </inst>
+				<inst> <type></type> <fu ref="EXEC_ALU"/> </inst>
+			</dispatch>
+		</stage>
+		<stage id="WB"> <!-- Write back stage-->
+			<name>WB</name>
+			<width>1</width>
+			<type>COMMIT</type>
+		</stage>
+	</stages>
 </processor>
