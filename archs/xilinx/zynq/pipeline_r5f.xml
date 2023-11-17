@@ -5,9 +5,58 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	
 	<!-- DOCUMENTATION
+		https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwiS6uKPoMaCAxXmRaQEHQjOAUkQFnoECA0QAQ&url=https%3A%2F%2Fdocumentation-service.arm.com%2Fstatic%2F5f042788cafe527e86f5cc83%3Ftoken%3D&usg=AOvVaw1t9Z6H0AlFH7k6BFcIRvB5&opi=89978449
 		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview
 	-->
 	<arch>armv7-a</arch>
 	<model>Zynq UltraScale+™ MPSoC</model>
 	<frequency>600000000</frequency> <!-- CPU frequency: Up to 667 MHz -->
+	<stages>
+		<stage id="FE">
+			<name>Fetch</name>
+			<width>1</width>
+			<type>FETCH</type>
+		</stage>
+		<stage id="DE">
+			<name>Decode</name>
+			<width>2</width>
+			<type>LAZY</type>
+		</stage>
+		<stage id="EXE">
+			<name>EXE</name>
+			<type>EXEC</type>
+			<fus>
+				<fu id="EXEC_F"> <!-- FPU -->
+					<name>EXEC_F</name>
+					<width>1</width>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_NEON"> <!-- NEON -->
+					<name>EXEC_NEON</name>
+					<width>1</width>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_ALU"> <!-- ALU -->
+					<name>EXEC_ALU</name>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
+					<name>EXEC_LDST</name>
+					<width>1</width>
+					<pipelined>true</pipelined>
+				</fu>
+			</fus>
+			<dispatch>
+				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
+				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
+				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_NEON"/> </inst>
+				<inst> <type></type> <fu ref="EXEC_ALU"/> </inst>
+			</dispatch>
+		</stage>
+		<stage id="WB"> <!-- Write back stage-->
+			<name>WB</name>
+			<width>1</width>
+			<type>COMMIT</type>
+		</stage>
+	</stages>
 </processor>
