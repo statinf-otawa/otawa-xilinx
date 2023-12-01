@@ -15,61 +15,55 @@
 	-->
 	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
-	<frequency>1000000000</frequency> <!-- CPU frequency: Up to 1 GHz -->
+	<!-- <frequency>1000000000</frequency> CPU frequency: Up to 1 GHz -  Wait for Hugues's feed back--> 
 	<stages>
 		<stage id="FE">
 			<name>Fetch</name>
-			<width>1</width>
+			<width>2</width>
 			<type>FETCH</type>
 		</stage>
 		<stage id="DE">
 			<name>Decode</name>
 			<width>2</width>
 			<type>LAZY</type>
-			<latency>2</latency>
 		</stage>
 		<stage id="REGR"> <!-- Register rename stage -->
 			<name>RegR</name>
-			<width>2</width> <!-- I'm not confident about this -->
+			<width>2</width>
 			<type>LAZY</type>
 		</stage>
 		<stage id="DIS"> <!-- Dispatch stage -->
 			<name>DISPATCH</name>
-			<width>3</width> <!-- I'm not confident about this. Maybe 4-->
+			<width>2</width> 
 			<type>LAZY</type>
 		</stage>
 		<stage id="EXE">
 			<name>EXE</name>
 			<type>EXEC</type>
 			<fus>
-				<fu id="EXEC_F"> <!-- FPU -->
+				<fu id="EXEC_F"> <!-- FPU / NEON  -->
 					<name>EXEC_F</name>
 					<width>1</width>
-					<latency>32</latency>
+					<latency>32</latency> <!-- doc: 6, 38 and 5, 18 -->
 					<pipelined>true</pipelined>
 				</fu>
-				<fu id="EXEC_NEON"> <!-- NEON -->
-					<name>EXEC_NEON</name>
-					<width>1</width>
-					<latency>5</latency>
-					<pipelined>true</pipelined>
-				</fu>
-				<fu id="EXEC_MUL"> <!-- MUL -->
+
+				<fu id="EXEC_MUL"> <!-- MUL / ALU-->
 					<name>EXEC_MUL</name>
 					<width>1</width>
-					<latency>3</latency>
+					<latency>5</latency> <!-- doc: 7, 203 -->
 					<pipelined>true</pipelined>
 				</fu>
 				<fu id="EXEC_ALU"> <!-- ALU -->
 					<name>EXEC_ALU</name>
 					<width>2</width>
-					<latency>3</latency>
+					<latency>3</latency> <!-- doc: 7, 198 -->
 					<pipelined>true</pipelined>
 				</fu>
 				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
 					<name>EXEC_LDST</name>
 					<width>1</width>
-					<latency>9</latency>
+					<latency>9</latency> <!-- doc: 7, 202-->
 					<pipelined>true</pipelined>
 				</fu>
 			</fus>
@@ -77,13 +71,13 @@
 				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
 				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
 				<inst> <type>IS_MUL</type> <fu ref="EXEC_MUL"/> </inst>
-				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_NEON"/> </inst>
+				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_F"/> </inst>
 				<inst> <type></type> <fu ref="EXEC_ALU"/> </inst>
 			</dispatch>
 		</stage>
 		<stage id="WB"> <!-- Write back stage-->
 			<name>WB</name>
-			<width>1</width>
+			<width>4</width>
 			<type>COMMIT</type>
 		</stage>
 	</stages>

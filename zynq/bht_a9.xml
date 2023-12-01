@@ -3,11 +3,16 @@
 <bht class="otawa::hard::BHT">
     <!-- DOCUMENTATION
         https://users.ece.utexas.edu/~mcdermot/arch/articles/Zynq/ug585-Zynq-7000-TRM.pdf
-        https://developer.arm.com/documentation/100511/0401/functional-description/about-the-functions/dynamic-branch-prediction?lang=en
-	-->
-    <block_bits>7</block_bits>
-    <row_bits>1</row_bits>
-    <way_bits>1</way_bits>
+        https://www.7-cpu.com/cpu/Cortex-A9.html
+    -->
+    <block_bits>8</block_bits>
+    <row_bits>0</row_bits>
+    <way_bits>1</way_bits> 
+    <!-- Penalties have been found here : https://www.7-cpu.com/cpu/Cortex-A9.html 
+            "Branch misprediction penalty = 11 cycles"
+        We've already seen that it's not necessarily the right page to look at. Maybe, we should not 
+        precise the penalties ?
+    -->
     <cond_penalty>11</cond_penalty>
     <indirect_penalty>11</indirect_penalty>
     <cond_indirect_penalty>11</cond_indirect_penalty>

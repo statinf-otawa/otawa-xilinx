@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cache-config>
 	<!-- DOCUMENTATION
-		https://www.7-cpu.com/cpu/Cortex-A9.html
+		https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Summary?tocId=NRUhhcL~Vgsj24QKP_sNOQ
+		https://www.digikey.fr/fr/htmldatasheets/production/2108336/0/0/1/xc7z010-1cl225i
 		https://developer.arm.com/documentation/ddi0388/i/Caccifbd
 		https://en.wikipedia.org/wiki/ARM_Cortex-A9
 	-->
 	<dcache> <!-- 32 KB Level 1 4-way set-associative data cache -->
 		<block_bits>5</block_bits> <!--  32 bytes/line -->
 		<set_bits>2</set_bits> <!-- 4 ways set-associative -->
-		<row_bits>7</row_bits> <!-- n set-->
+		<row_bits>8</row_bits> <!-- n set-->
 		<replace>RANDOM</replace> <!-- Instruction cache replacement policy is either pseudo round-robin or pseudo random.-->
 		<next id="L2"> <!-- 512 KB 8-way set-associative Level 2 cache -->
 			<block_bits>5</block_bits> <!--  32 bytes/line -->
@@ -19,8 +20,8 @@
 	
 	<icache> <!-- 32 KB Level 1 4-way set-associative instruction cache -->
 		<block_bits>5</block_bits> <!--  32 bytes/line -->
-		<set_bits>2</set_bits> <!-- 8 ways -->
-		<row_bits>7</row_bits> <!-- n set-->
+		<set_bits>2</set_bits> <!-- 4 ways -->
+		<row_bits>8</row_bits> <!-- n set-->
 		<replace>RANDOM</replace> <!-- Instruction cache replacement policy is either pseudo round-robin or pseudo random.-->
 		<next ref="L2"/>
 	</icache>
