@@ -5,66 +5,73 @@
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	
 	<!-- DOCUMENTATION
-		https://www.xilinx.com/content/dam/xilinx/imgs/products/zynq/zynq-ev-block.PNG
+		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview =====> CPU frequency value is here.
+		http://web.cs.wpi.edu/~cs4515/d15/Protected/LecturesNotes_D15/CS4515-TeamB-Presentation.pdf
 		https://www.anandtech.com/show/11441/dynamiq-and-arms-new-cpus-cortex-a75-a55/4
 	-->
 	<arch>armv8-a</arch>
 	<model>Zynq UltraScale+™ MPSoC</model>
-	<frequency>1500000000</frequency>
+	<frequency>1500000000</frequency> <!-- CPU frequency: Up to 1.5 GHz - doc 2,1 -->
 	<stages>
 		<stage id="FE">
 			<name>Fetch</name>
-			<width>1</width>
+			<width>3</width>
 			<type>FETCH</type>
 		</stage>
 		<stage id="DE">
 			<name>Decode</name>
-			<width>2</width>
+			<width>3</width>
 			<type>LAZY</type>
 		</stage>
 		<stage id="ISS"> <!-- Issue stage -->
 			<name>ISSUE</name>
 			<type>LAZY</type>
+			<width>3</width>
 		</stage>
 		<stage id="EXE">
 			<name>EXE</name>
 			<type>EXEC</type>
 			<fus>
-				<fu id="EXEC_F"> <!-- FPU -->
+				<fu id="EXEC_F"> <!-- FPU/NEON -->
 					<name>EXEC_F</name>
 					<width>1</width>
 					<latency>32</latency>
 					<pipelined>true</pipelined>
 				</fu>
-				<fu id="EXEC_NEON"> <!-- NEON -->
-					<name>EXEC_NEON</name>
-					<width>1</width>
-					<latency>5</latency>
-					<pipelined>true</pipelined>
-				</fu>
 				<fu id="EXEC_ALU"> <!-- ALU -->
 					<name>EXEC_ALU</name>
-					<width>2</width>
-					<latency>3</latency>
+					<width>1</width>
+					<latency>1</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_ALU_M"> <!-- Multi-cycle Integer Pipeline - doc: 1, 19 -->
+					<name>EXEC_ALU</name>
+					<width>1</width>
+					<latency>36</latency>
+					<pipelined>true</pipelined>
+				</fu>
+				<fu id="EXEC_BR"> <!-- branch -->
+					<name>EXEC_BR</name>
 					<pipelined>true</pipelined>
 				</fu>
 				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
 					<name>EXEC_LDST</name>
 					<width>1</width>
-					<latency>9</latency>
+					<latency>1</latency>
 					<pipelined>true</pipelined>
 				</fu>
 			</fus>
 			<dispatch>
+				<inst> <type>IS_CONTROL</type> <fu ref="EXEC_BR"/> </inst>
 				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
-				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
-				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_NEON"/> </inst>
+				<inst> <type>IS_FLOAT|IS_SPECIAL</type> <fu ref="EXEC_F"/> </inst>
+				<inst> <type>IS_DIV|IS_MUL|IS_SHIFT</type> <fu ref="EXEC_ALU_M"/> </inst>
 				<inst> <type></type> <fu ref="EXEC_ALU"/> </inst>
 			</dispatch>
 		</stage>
 		<stage id="WB"> <!-- Write back stage-->
 			<name>WB</name>
-			<width>1</width>
+			<width>5</width>
 			<type>COMMIT</type>
 		</stage>
 	</stages>

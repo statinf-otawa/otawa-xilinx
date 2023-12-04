@@ -5,8 +5,8 @@
         https://developer.arm.com/documentation/ddi0500/e/functional-description/about-the-cortex-a53-processor-functions/instruction-fetch-unit
         https://www.7-cpu.com/cpu/Cortex-A53.html
 	-->
-    <block_bits>7</block_bits>
-    <row_bits>1</row_bits>
+    <block_bits>8</block_bits>
+    <row_bits>0</row_bits>
     <way_bits>1</way_bits>
     <cond_penalty>7</cond_penalty>
     <indirect_penalty>7</indirect_penalty>

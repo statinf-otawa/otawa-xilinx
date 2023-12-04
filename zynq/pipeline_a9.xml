@@ -15,7 +15,7 @@
 	-->
 	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
-	<!-- <frequency>1000000000</frequency> CPU frequency: Up to 1 GHz -  Wait for Hugues's feed back--> 
+	<frequency>1000000000</frequency> CPU frequency: Up to 1 GHz -  Wait for Hugues's feed back 
 	<stages>
 		<stage id="FE">
 			<name>Fetch</name>

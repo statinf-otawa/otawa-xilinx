@@ -4,17 +4,17 @@
 		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview
 		https://documentation-service.arm.com/static/5f042788cafe527e86f5cc83?token=
 	-->
-	<dcache> <!-- 32 KB Level 1 4-way set-associative data cache -->
+	<dcache> <!-- 32 KB Level 1 4-way set-associative data cache - doc : 2,31 -->
 		<block_bits>5</block_bits> <!--  8-word cache line length -->
-		<set_bits>2</set_bits> <!-- 4 ways set-associative -->
-		<row_bits>7</row_bits> <!-- n set-->
-		<replace>RANDOM</replace> <!-- Pseudo-random cache replacement policy -->
+		<way_bits>2</way_bits> <!-- 4 ways set-associative -->
+		<row_bits>8</row_bits> <!-- n set-->
+		<replace>RANDOM</replace> <!-- Pseudo-random cache replacement policy - doc : 2,31-->
 	</dcache>
 	
 	<icache> <!-- 32 KB Level 1 4-way set-associative instruction cache -->
 		<block_bits>5</block_bits> <!--  8-word cache line length -->
-		<set_bits>2</set_bits> <!-- 8 ways -->
-		<row_bits>7</row_bits> <!-- n set-->
-		<replace>RANDOM</replace> <!-- Pseudo-random cache replacement policy -->
+		<way_bits>2</way_bits> <!-- 4 ways set-associative -->
+		<row_bits>8</row_bits> <!-- n set-->
+		<replace>RANDOM</replace> <!-- Pseudo-random cache replacement policy - doc : 2,31 -->
 	</icache>
 </cache-config>

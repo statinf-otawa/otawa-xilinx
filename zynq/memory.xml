@@ -6,7 +6,7 @@
         https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
         https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping
 	-->
-    <banks>
+    <banks> <!-- all doc: 3-->
         <bank>
             <name>OCM0</name> <!-- Bank 0 of On chip mem -->
             <address>0xFFFC0000</address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
