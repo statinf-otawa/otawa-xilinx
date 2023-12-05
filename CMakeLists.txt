@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # configuration
-set(SCRIPT	"xilinx-zcu-712_r5f")
+set(SCRIPT	"xilinx_r5")
 set(FILES	"zynq/memory.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
 set(SOURCES
 	cortexr5.cpp
@@ -38,15 +38,6 @@ execute_process(COMMAND "${OTAWA_CONFIG}" -p ${SCRIPT}.eld --libs --rpath -p ${S
 execute_process(COMMAND "${OTAWA_CONFIG}" --plugdir  OUTPUT_VARIABLE PLUGDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND "${OTAWA_CONFIG}" --scriptdir  OUTPUT_VARIABLE SCRIPTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-
-
-# auto-generated
-#add_custom_command(
-#	OUTPUT "arm9_time.h" DEPENDS "time.tpl" "time.nmp" ${IRG}
-#	COMMAND ${GLISS_ATTR}
-#	ARGS ${IRG} -o arm9_time.h -a arm7_time -t "time.tpl" -d "SET_TIME(time_unexec);" -e time.nmp -p
-#	VERBATIM
-#)
 
 
 # plugin definition

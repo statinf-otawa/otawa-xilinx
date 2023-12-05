@@ -33,8 +33,8 @@
 	<!-- SCRIPT ::= -->
 	<script>
 		<!-- WCET computation -->
-		<step processor="otawa::xilinx-zcu-712_r5f::BlockTime">
-			<config name="otawa::xilinx-zcu-712_r5f::INSTRUCTION_TIME" value="1"/>
+		<step processor="otawa::xilinx_r5::BlockTime">
+			<config name="otawa::xilinx_r5::INSTRUCTION_TIME" value="1"/>
 		</step>
 		<step require="otawa::ipet::WCET_FEATURE"/>	
 	</script>

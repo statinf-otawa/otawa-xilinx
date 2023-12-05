@@ -9,7 +9,7 @@
     <banks> <!-- all doc: 3-->
         <bank>
             <name>OCM0</name> <!-- Bank 0 of On chip mem -->
-            <address>0xFFFC0000</address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
+            <address><offset>0xFFFC0000</offset></address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
             <size>0x10000</size> <!-- 64 Kbytes -->
             <type>DRAM</type> <!-- The docs says it's a RAM. I could not find if it is a SRAM or DRAM.
                                 But it should be DRAM because SRAM is usually used for cache mem -->
@@ -19,7 +19,7 @@
         </bank>
         <bank>
             <name>OCM1</name> <!-- Bank 1 of On chip mem -->
-            <address>0xFFFD0000</address> <!-- Range is 0xFFFD_0000 to 0xFFFD_FFFF -->
+            <address><offset>0xFFFD0000</offset></address> <!-- Range is 0xFFFD_0000 to 0xFFFD_FFFF -->
             <size>0x10000</size> <!-- 64 Kbytes -->
             <type>DRAM</type> <!-- Same as bank 0 -->
             <cached>false</cached>
@@ -28,7 +28,7 @@
         </bank>
         <bank>
             <name>OCM2</name> <!-- Bank 2 of On chip mem -->
-            <address>0xFFFE0000</address> <!-- Range is 0xFFFE_0000 to 0xFFFE_FFFF -->
+            <address><offset>0xFFFE0000</offset></address> <!-- Range is 0xFFFE_0000 to 0xFFFE_FFFF -->
             <size>0x10000</size> <!-- 64 Kbytes -->
             <type>DRAM</type> <!-- Same as bank 0 -->
             <cached>false</cached>
@@ -37,7 +37,7 @@
         </bank>
         <bank>
             <name>OCM3</name> <!-- Bank 3 of On chip mem -->
-            <address>0xFFFF0000</address> <!-- Range is 0xFFFF_0000 to 0xFFFF_FFFF -->
+            <address><offset>0xFFFF0000</offset></address> <!-- Range is 0xFFFF_0000 to 0xFFFF_FFFF -->
             <size>0x10000</size> <!-- 64 Kbytes -->
             <type>DRAM</type> <!-- Same as bank 0 -->
             <cached>false</cached>

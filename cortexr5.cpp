@@ -1,5 +1,5 @@
 /*
- *	xilinx module implementation
+ *	xilinx_r5 module implementation
  *
  *	This file is part of OTAWA
  *	Copyright (c) 2017, IRIT UPS.
@@ -32,18 +32,19 @@
 #include <otawa/prop/Identifier.h>
 #include <otawa/prop/Property.h>
 #include <otawa/prop/PropList.h>
-// #include <otawa/xilinx/features.h>
+#include <otawa/etime/EdgeTimeBuilder.h>
+#include <otawa/loader/arm.h>
 
-namespace otawa { namespace xilinx {
+namespace otawa { namespace xilinx_r5 {
 	extern p::id<int> INSTRUCTION_TIME;
 
 
 using namespace ilp;
 
 /**
- * @defgroup xilinx	Trivial Analyzes
+ * @defgroup xilinx_r5	Trivial Analyzes
  *
- * This plugin contains several xilinx analyzes. They do not provide
+ * This plugin contains several xilinx_r5 analyzes. They do not provide
  * a realistic WCET computation but they may be used for different purposes:
  * @li to have a fast WCET computation environment in order to test a specific analysis,
  * @li to overestimate some effects hardware effects to obtain a maximum overestimation,
@@ -68,7 +69,7 @@ using namespace ilp;
  * Configuration properties:
  * @li @ref INSTRUCTION_TIME
  *
- * @ingroup xilinx
+ * @ingroup xilinx_r5
  */
 class BlockTime: public BBProcessor {
 public:
@@ -103,7 +104,7 @@ private:
 
 /**
  */
-p::declare BlockTime::reg = p::init("otawa::xilinx::BlockTime", Version(1, 0, 0))
+p::declare BlockTime::reg = p::init("otawa::xilinx_r5::BlockTime", Version(1, 0, 0))
 	.base(BBProcessor::reg)
 	.maker<BlockTime>()
 	.provide(ipet::BB_TIME_FEATURE);
@@ -114,7 +115,7 @@ p::declare BlockTime::reg = p::init("otawa::xilinx::BlockTime", Version(1, 0, 0)
  * User Analyzes or Features:
  * @li @ref BlockTime
  */
-p::id<int> INSTRUCTION_TIME("otawa::xilinx::INSTRUCTION_TIME", 5);
+p::id<int> INSTRUCTION_TIME("otawa::xilinx_r5::INSTRUCTION_TIME", 5);
 
 
 /**
@@ -131,7 +132,7 @@ p::id<int> INSTRUCTION_TIME("otawa::xilinx::INSTRUCTION_TIME", 5);
  * @li @ref hard::CACHE_CONFIGURATION_FEATURE
  * @li @ref ipet::ASSIGNED_VARS_FEATURE
  *
- * @ingroup xilinx
+ * @ingroup xilinx_r5
  */
 class AllMissICacheTime: public Processor {
 public:
@@ -171,7 +172,7 @@ private:
 	const hard::Memory *mem;
 };
 
-p::declare AllMissICacheTime::reg = p::init("otawa::xilinx::AllMissICacheTime", Version(1, 0, 0))
+p::declare AllMissICacheTime::reg = p::init("otawa::xilinx_r5::AllMissICacheTime", Version(1, 0, 0))
 	.make<AllMissICacheTime>()
 	.require(cache::COLLECTED_LBLOCKS_FEATURE)
 	.require(ipet::ILP_SYSTEM_FEATURE)
@@ -180,12 +181,12 @@ p::declare AllMissICacheTime::reg = p::init("otawa::xilinx::AllMissICacheTime", 
 	.require(ipet::ASSIGNED_VARS_FEATURE)
 	.provide(ipet::INST_CACHE_SUPPORT_FEATURE);
 
-
 /* plugin hook */
-ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinx", OTAWA_PROC_VERSION)
+ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinx_r5", OTAWA_PROC_VERSION)
 	.version(Version(1, 0, 0))
 	.hook(OTAWA_PROC_NAME);
 ELM_PLUGIN(plugin, OTAWA_PROC_HOOK);
 
-} }		// otawa::xilinx
+} // namespace xilinx_r5
+} // namespace otawa
 
