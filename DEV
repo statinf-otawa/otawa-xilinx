@@ -7,8 +7,8 @@ This implementation attempts to support the WCET computation for:
 ===== TODO =====
 
     - update all micro architecture descriptions (xml file) with latency if available
-    - write the otawa-plugin for all processing units
-    - Update the instruction timing description (in the nmp file and the cost in the cpp file)
+    - write the otawa-plugin for all processing units (Urgently for the Cortex R5 RPU)
+    - Rewrite the instruction timing description (in the nmp file and the cost in the cpp file)
 
 ==== On going =====
     - Microarchitecture description
@@ -22,3 +22,4 @@ This implementation attempts to support the WCET computation for:
     - https://docs.xilinx.com/r/en-US/am011-versal-acap-trm/States?tocId=GE0VLeFxsGZJjgNsLJxNjg
     - https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
     - https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping
+    - Cortex ™-R5 and Cortex-R5F Revision: r1p1 Technical Reference Manual 

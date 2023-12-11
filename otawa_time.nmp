@@ -1,3 +1,4 @@
+canon int(32) "time_parallel_data"
 canon int(32) "time_branch"
 canon int(32) "time_data_normal"
 canon int(32) "time_data_pc"
@@ -78,3 +79,6 @@ extend MUL, MLA
 
 extend SMULL, UMULL, SMLAL, UMLAL
 	arm7_time = { time("time_mult_long"); }
+
+extend UADD16_thumb2, UADD8_thumb2
+	arm7_time = { time("time_parallel_data"); }

@@ -40,6 +40,7 @@
 			<name>LSU</name>
 			<type>COMMIT</type>
 			<latency>13</latency> <!-- doc : 1, 442-->
+			<mem>true</mem>
 		</stage>
 	</stages>
 </processor>
