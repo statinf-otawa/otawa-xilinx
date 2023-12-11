@@ -5,6 +5,7 @@ set(SCRIPT	"xilinx_r5")
 set(FILES	"zynq/memory.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
 set(SOURCES
 	cortexr5.cpp
+    r5_time.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
 set(GLISS_HOME 	"${CMAKE_SOURCE_DIR}/../gliss2")
@@ -39,6 +40,12 @@ execute_process(COMMAND "${OTAWA_CONFIG}" --plugdir  OUTPUT_VARIABLE PLUGDIR OUT
 execute_process(COMMAND "${OTAWA_CONFIG}" --scriptdir  OUTPUT_VARIABLE SCRIPTDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
+add_custom_command(
+	OUTPUT "r5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
+	COMMAND ${GLISS_ATTR}
+	ARGS ${IRG} -o r5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unexec);" -e otawa_time.nmp -p
+	VERBATIM
+)
 
 # plugin definition
 include_directories("${CMAKE_SOURCE_DIR}" "${ARM_HOME}/include")
@@ -56,4 +63,3 @@ install(FILES "${SCRIPT}.osx" DESTINATION "${SCRIPTDIR}")
 foreach(FILE ${FILES})
 	install(FILES ${CMAKE_SOURCE_DIR}/${FILE} DESTINATION "${SCRIPTDIR}/zynq")
 endforeach()
-
