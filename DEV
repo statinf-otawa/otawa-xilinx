@@ -11,6 +11,7 @@ This implementation attempts to support the WCET computation for:
     - Rewrite the instruction timing description (in the nmp file and the cost in the cpp file)
 
 ==== On going =====
+    - Rewrite otawa_time.nmp and instruction timing in cpp files
     - Microarchitecture description
     - Writing the otawa-plugin for the RPU (arm cortex r5) of Xilinx UltraScale ZCU 712
 
