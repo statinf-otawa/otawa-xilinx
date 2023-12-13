@@ -39,10 +39,18 @@
 
 	<!-- SCRIPT ::= -->
 	<script>
+		<step require="otawa::VIRTUALIZED_CFG_FEATURE"/>
+
+		<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
+		<step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
+		<step require="otawa::hard::BHT_FEATURE"/>
+
+
 		<!-- WCET computation -->
-		<step processor="otawa::xilinx_r5::BlockTime">
+		<!-- <step processor="otawa::xilinx_r5::WCETDefByIT">
 			<config name="otawa::xilinx_r5::INSTRUCTION_TIME" value="1"/>
-		</step>
+		</step>  -->
+		<step processor="otawa::xilinx_r5::BBTimerXilinxR5"/>
 		<step require="otawa::ipet::WCET_FEATURE"/>	
 	</script>
 </otawa-script>
