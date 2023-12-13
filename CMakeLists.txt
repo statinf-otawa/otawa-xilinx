@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 set(SCRIPT	"xilinx_r5")
 set(FILES	"zynq/memory.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
 set(SOURCES
-	cortexr5.cpp
+	XilinxR5BBTime.cpp
     r5_time.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
