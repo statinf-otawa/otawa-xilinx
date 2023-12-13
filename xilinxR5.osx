@@ -47,10 +47,10 @@
 
 
 		<!-- WCET computation -->
-		<!-- <step processor="otawa::xilinx_r5::WCETDefByIT">
-			<config name="otawa::xilinx_r5::INSTRUCTION_TIME" value="1"/>
+		<!-- <step processor="otawa::xilinxR5::WCETDefByIT">
+			<config name="otawa::xilinxR5::INSTRUCTION_TIME" value="1"/>
 		</step>  -->
-		<step processor="otawa::xilinx_r5::BBTimerXilinxR5"/>
+		<step processor="otawa::xilinxR5::BBTimerXilinxR5"/>
 		<step require="otawa::ipet::WCET_FEATURE"/>	
 	</script>
 </otawa-script>

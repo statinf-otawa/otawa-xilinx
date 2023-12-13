@@ -1,11 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # configuration
-set(SCRIPT	"xilinx_r5")
+set(SCRIPT	"xilinxR5")
 set(FILES	"zynq/memory.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
 set(SOURCES
-	XilinxR5BBTime.cpp
-    r5_time.h
+	xilinxR5BBTime.cpp
+    xilinxR5_time.h
+	timing.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
 set(GLISS_HOME 	"${CMAKE_SOURCE_DIR}/../gliss2")
@@ -41,9 +42,9 @@ execute_process(COMMAND "${OTAWA_CONFIG}" --scriptdir  OUTPUT_VARIABLE SCRIPTDIR
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 add_custom_command(
-	OUTPUT "r5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
+	OUTPUT "xilinxR5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o r5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unexec);" -e otawa_time.nmp -p
+	ARGS ${IRG} -o xilinxR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unexec);" -e otawa_time.nmp -p
 	VERBATIM
 )
 
