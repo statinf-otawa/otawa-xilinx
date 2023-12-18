@@ -1,1 +1,6 @@
-allButOne2 is build for arm cortex R5 from allButOne2.c from [here](https://github.com/statinf-software/statinf-benchmarks/blob/master/obviews-example/allButOne2.c)
+### allButOne2
+ is build for arm cortex R5 from allButOne2.c from [here](https://github.com/statinf-software/statinf-benchmarks/blob/master/obviews-example/allButOne2.c)
+
+ ### Compilation option:
+```sh
+ arm-linux-gnueabi-gcc -mcpu=cortex-r5  -mfloat-abi=softfp ~/statinf-benchmarks/obviews-example/allButOne2.c -static  -o allButOne2 -nostartfiles  -nodefaultlibs```
