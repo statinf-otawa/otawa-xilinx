@@ -39,6 +39,8 @@
 
 	<!-- SCRIPT ::= -->
 	<script>
+		<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="exegR5"/>
+		<config name="otawa::ipet::EXPLICIT" value="true"/>
 		<step require="otawa::VIRTUALIZED_CFG_FEATURE"/>
 
 		<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>

@@ -100,102 +100,124 @@ namespace otawa { namespace xilinxR5 {
 			info = id(_ws->process());
 			if(!info)
 				throw Exception("ARM loader with otawa::arm::INFO is required !");
+			mem = hard::MEMORY_FEATURE.get(ws);
+			ASSERTP(mem, "Memory feature not found");
+			cout << mem->worstWriteTime() << " " << mem->worstReadTime() << endl;
+			const hard::CacheConfiguration *cconf = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
+			// if(!cconf)
+			// 	throw Exception("no cache");
+			// const hard::Cache *dcache = cconf->dataCache();
+			// if (!dcache)
+			// 	throw Exception("no data cache");
 		}
 
-		void build(void) override {
-			otawa::ParExeGraph::build();
-			
-			// Look for FU
+		void add_edges_for_pipeline_order_and_fetch() {
+			/*
+			 This function attempts to add edges :
+			 	--- that represent the order of stages in the pipeline.
+				--- for fetch timing (by calling the default implementation of ParExeGraph::addEdgesForFetch())
+				--- for misprediction of branch instructions
+			 This function also update the ExecGraph with the execution penalty for instructions
+			*/
+
+			// fetch edges
+			ParExeGraph::addEdgesForFetch();
+
+			ParExeInst* prev_inst = 0;
+			for (InstIterator inst(this); inst(); inst++) {
+				void* inst_info = info->decode(inst->inst());
+				xilinx_r5_time_t* inst_time = xilinx_r5_time(inst_info);
+				info->free(inst_info);
+
+				// Update featch edges with misprediction branch penalties
+				if (prev_inst && prev_inst->inst()->isControl()) {
+					ot::time delay;
+					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
+						if (!prev_inst->inst()->target()) { // Is true for indirect branches. TODO: check it
+							delay = inst_time->br_penalty;
+							// if (delay >= 2) 
+							// 	new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
+						}
+					}
+				}
+				prev_inst = *inst;
+				ParExeNode* prev_node = nullptr;
+				// Add edges that represent the order of stages in the pipeline
+				for (ParExeInst::NodeIterator node(*inst); node(); node++) {
+					if (prev_node)
+						new ParExeEdge(prev_node, *node, ParExeEdge::SOLID, 0, "pipeline order");
+					if (node->stage()->name().startsWith("EXEC_")) {  // execution stage 
+						node->setLatency(inst_time->ex_cost); // TODO: find why sometimes, the node latency is increased: ben
+						cout << node->latency() << " " << node->stage()->name() <<endl;
+					}
+					prev_node = *node;
+				}
+			}
+		}
+		void add_edges_for_program_order() {
+			// Add edge to ensure processing the instructions in the order of the program.
+			// TODO: check why it build two edges sometimes/ is program order required for WR stage ?
+			ParExeGraph::addEdgesForProgramOrder();
+		}
+		void processBB(WorkSpace *ws, CFG *cfg, Block *b) override {
+			cout << "Processing BB " << endl;
+			if(b->isEnd())
+			return;
+		}
+
+		void build(void) override {			
+			// Look for FUs
 			stage[NO] = 0;
 			for(ParExePipeline::StageIterator pipeline_stage(_microprocessor->pipeline()); pipeline_stage(); pipeline_stage++) {
 				if(pipeline_stage->name() == "PreFetch") {
 					stage[FE] = *pipeline_stage;
 				} else if(pipeline_stage->name() == "EXE") {
-					stage[EXE] = *pipeline_stage;
+					// stage[EXE] = *pipeline_stage;
 					for(int i = 0; i < pipeline_stage->numFus(); i++) {
 						ParExePipeline *fu = pipeline_stage->fu(i);
-						if (fu->firstStage()->name().startsWith("EXEC_F"))
+						if (fu->firstStage()->name().startsWith("EXEC_F")) {
 							exec_f_fu = fu;
-						else if (fu->firstStage()->name().startsWith("EXEC_DPU"))
+							stage[EXE] = fu->firstStage();
+						}
+						else if (fu->firstStage()->name().startsWith("EXEC_DPU")) {
 							exec_dpu_fu = fu;
+							stage[EXE] = fu->firstStage();
+						}
+						else if (fu->firstStage()->name().startsWith("EXEC_LSU")) {
+							exec_lsu_fu = fu;
+							stage[EXE] = fu->firstStage();
+						}
 						else
 							ASSERTP(false, fu->firstStage()->name());
-					}
-				} else if(pipeline_stage->name() == "LSU") {
-					stage[LSU] = *pipeline_stage;
-				}
-			}
-			ASSERT(exec_f_fu);
-			ASSERT(exec_dpu_fu);
-			ASSERTP(stage[FE], "No 'Prefetch' stage found");
-			ASSERTP(stage[EXE], "No 'EXE' stage found");
-			ASSERTP(stage[LSU], "No 'Load and Store Unit' stage found");
-
-			// Register usage
-			const hard::Register* pc = _ws->process()->platform()->getPC();
-			int rn = _ws->process()->platform()->regCount();
-			ParExeNode* regs[rn];
-			elm::array::set(regs, rn, static_cast<ParExeNode *>(0));
-
-			ParExeNode *branch = 0, *prev_mem = 0, *prev = 0;
-			for(InstIterator inst(this); inst(); inst++) {
-				void* inst_info = info->decode(inst->inst());
-				xilinx_r5_time_t *inst_time = xilinx_r5_time(inst_info);
-				info->free(inst_info);
-
-				// Process previous branch
-				if(branch && branch->inst()->inst()->topAddress() != inst->inst()->topAddress()) {
-					new ParExeEdge(branch, inst->firstNode(), ParExeEdge::SOLID);
-					branch = 0;
-				}			
-
-				// Look in the stage
-				for(ParExeInst::NodeIterator node(*inst); node(); node++) {
-					// On branch stage
-					if(node->stage() == stage[inst_time->branch])
-						branch = *node;
-					else
-						branch = 0;
-					// On EX stage
-					if(node->stage() == stage[EXE]) {
-						node->setLatency(inst_time->ex_cost);
-						// look execution dependencies in EX stage
-						const Array< hard::Register* >& read_reg = inst->inst()->readRegs();
-						for(int i = 0; i < read_reg.count(); i++)
-							if(read_reg[i] != pc && regs[read_reg[i]->platformNumber()])
-								new ParExeEdge(regs[read_reg[i]->platformNumber()], *node, ParExeEdge::SOLID);
-					}
-
-					// On producing stage
-					if(node->stage() == stage[inst_time->prod]) {
-						const Array< hard::Register* >& written_reg = inst->inst()->writtenRegs();
-						for(int i = 0; i < written_reg.count(); i++)
-							if(written_reg[i] != pc) {
-								regs[written_reg[i]->platformNumber()] = *node;
-							}
-					}
-
-					// Load and Store Unit
-					if (node->stage() == stage[LSU]) {
-						node->setLatency(inst_time->me_cost);
-
-						// Dependencies support
-						if (prev_mem) {
-							new ParExeEdge(prev_mem, *node, ParExeEdge::SOLID);
-						}
-						prev_mem = *node;
-						// TODO: Add support for data cache
 						
 					}
+				} else if(pipeline_stage->name() == "WR") {
+					stage[WR] = *pipeline_stage;
 				}
-				
 			}
+			ASSERTP(stage[FE], "No 'Prefetch' stage found");
+			ASSERTP(stage[EXE], "No 'EXE' stage found");
+			ASSERTP(stage[WR], "No 'Write back' stage found"); // This is maybe not required
+			ASSERTP(exec_f_fu, "No FPU fu found");
+			ASSERTP(exec_dpu_fu, "No DPU fu found");
+			ASSERTP(exec_lsu_fu, "No LSU fu found");
+
+			// Build the execution graph 
+			ParExeGraph::createSequenceResources();
+			ParExeGraph::createNodes();
+			add_edges_for_pipeline_order_and_fetch();
+			add_edges_for_program_order();
+			ParExeGraph::addEdgesForMemoryOrder(); // TODO: memory order for consecutive str is not required. add me cost
+			ParExeGraph::addEdgesForDataDependencies(); // TODO: rewrite and add latency values. data cache support pending
+			ParExeGraph::addEdgesForQueues();
 		}
 
+		
 	private:
 		otawa::arm::Info* info;
+		const hard::Memory *mem;
 		ParExeStage* stage[CNT];
-		ParExePipeline *exec_f_fu, *exec_dpu_fu;
+		ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
 	};
 
 

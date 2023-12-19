@@ -19,28 +19,53 @@
 		<stage id="EXE">
 			<name>EXE</name>
 			<type>EXEC</type>
+			<ordered>true</ordered>
 			<fus>
 				<fu id="EXEC_F"> <!-- FPU -->
 					<name>EXEC_F</name>
-					<pipelined>true</pipelined>
-					<latency>96</latency> <!-- doc : 1, 453-->
+					<pipelined>false</pipelined>
+					<!-- <latency>96</latency> doc : 1, 453 -->
 				</fu>
 				<fu id="EXEC_DPU"> <!-- DPU -->
 					<name>EXEC_DPU</name>
-					<pipelined>true</pipelined>
-					<latency>9</latency> <!-- doc : 1, 428-->
+					<pipelined>false</pipelined>
+					<!-- <latency>9</latency> doc : 1, 428 -->
+				</fu>
+				<fu id="EXEC_LSU"> <!-- DPU -->
+					<name>EXEC_LSU</name>
+					<pipelined>false</pipelined>
+					<!-- <latency>9</latency> doc : 1, 428 -->
+					<mem>true</mem>
 				</fu>
 			</fus>
 			<dispatch>
 				<inst> <type>IS_FLOAT|IS_SPECIAL</type> <fu ref="EXEC_F"/> </inst>
+				<inst> <type>IS_MEM</type> <fu ref="EXEC_LSU"/> </inst>
+				<inst> <type>IS_LOAD</type> <fu ref="EXEC_LSU"/> </inst>
+				<inst> <type>IS_STORE</type> <fu ref="EXEC_LSU"/> </inst>
 				<inst> <type></type> <fu ref="EXEC_DPU"/> </inst>
 			</dispatch>
-		</stage>
-		<stage id="LSU"> <!-- Load and store unit-->
-			<name>LSU</name>
+			
+		</stage> 
+		<stage id="WR">
+			<name>Write</name>
 			<type>COMMIT</type>
-			<latency>13</latency> <!-- doc : 1, 442-->
-			<mem>true</mem>
+			<width>1</width>
+			<latency>0</latency>
 		</stage>
 	</stages>
+	<!-- TODO: add queue page 165-->
+	<!-- <queues>
+		<queue>
+			<name>FE_QUEUE</name>
+			<size>3</size>
+			<output ref="FE"/>
+		</queue>
+		<queue>
+			<name>DPU_QUEUE</name>
+			<size>8</size>
+			<input ref="FE"/>
+			<output ref="EXE"/>
+		</queue>
+	</queues> -->
 </processor>
