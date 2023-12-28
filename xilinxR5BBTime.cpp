@@ -24,7 +24,6 @@
 #include <otawa/loader/arm.h>
 #include "timing.h"
 
-
 namespace otawa { namespace xilinxR5 {
 	extern p::id<int> INSTRUCTION_TIME; // instruction cost in cycles
 
@@ -111,16 +110,7 @@ namespace otawa { namespace xilinxR5 {
 			// 	throw Exception("no data cache");
 		}
 
-		void add_edges_for_pipeline_order_and_fetch() {
-			/*
-			 This function attempts to add edges :
-			 	--- that represent the order of stages in the pipeline.
-				--- for fetch timing (by calling the default implementation of ParExeGraph::addEdgesForFetch())
-				--- for misprediction of branch instructions
-			 This function also update the ExecGraph with the execution penalty for instructions
-			*/
-
-			// fetch edges
+		void addEdgesForFetch() override {
 			ParExeGraph::addEdgesForFetch();
 
 			ParExeInst* prev_inst = 0;
@@ -129,18 +119,27 @@ namespace otawa { namespace xilinxR5 {
 				xilinx_r5_time_t* inst_time = xilinx_r5_time(inst_info);
 				info->free(inst_info);
 
-				// Update featch edges with misprediction branch penalties
+				// Update fetch edges with misprediction branch penalties
 				if (prev_inst && prev_inst->inst()->isControl()) {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
-						if (!prev_inst->inst()->target()) { // Is true for indirect branches. TODO: check it
+						if (!prev_inst->inst()->target()) { // Should be true for indirect branches. TODO: check it
 							delay = inst_time->br_penalty;
-							// if (delay >= 2) 
-							// 	new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
+							if (delay >= 2) 
+								new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
 						}
 					}
 				}
 				prev_inst = *inst;
+			}
+		}
+
+		void addEdgesForPipelineOrder() override {
+			for (InstIterator inst(this); inst(); inst++) {
+				void* inst_info = info->decode(inst->inst());
+				xilinx_r5_time_t* inst_time = xilinx_r5_time(inst_info);
+				info->free(inst_info);
+
 				ParExeNode* prev_node = nullptr;
 				// Add edges that represent the order of stages in the pipeline
 				for (ParExeInst::NodeIterator node(*inst); node(); node++) {
@@ -154,15 +153,42 @@ namespace otawa { namespace xilinxR5 {
 				}
 			}
 		}
-		void add_edges_for_program_order() {
-			// Add edge to ensure processing the instructions in the order of the program.
-			// TODO: check why it build two edges sometimes/ is program order required for WR stage ?
-			ParExeGraph::addEdgesForProgramOrder();
-		}
-		void processBB(WorkSpace *ws, CFG *cfg, Block *b) override {
-			cout << "Processing BB " << endl;
-			if(b->isEnd())
-			return;
+
+		void addEdgesForMemoryOrder() override {
+			// Call the default implementation
+			ParExeGraph::addEdgesForMemoryOrder();
+
+			// Now add edges between consecutive reads
+		
+			// """ The Cortex-R5 processor has an in-order pipeline, so any non-cached read blocks,
+			// preventing any subsequent read or write from starting until the current read is complete. """"
+			// 'write after read' are already handled by the default implementation.
+			// The next lines will add the support of 'read after read'.
+			
+			static string memory_order = "memory order";
+			auto stage = _microprocessor->execStage();
+
+			// looking in turn each FU
+			for (int i=0 ; i<stage->numFus() ; i++) {
+				ParExeStage* fu_stage = stage->fu(i)->firstStage();
+				ParExeNode* previous_load = nullptr;
+
+				// look for each node of this FU
+				for (int j=0 ; j<fu_stage->numNodes() ; j++){
+					ParExeNode* node = fu_stage->node(j);
+					// found a load instruction
+					if (node->inst()->inst()->isLoad()) {
+						// if any, add dependency on the previous load
+						if (previous_load)
+							new ParExeEdge(previous_load, node, ParExeEdge::SOLID, 0, memory_order);
+						
+						// current node becomes the new previous load
+						for (InstNodeIterator last_node(node->inst()); last_node() ; last_node++)
+							if (last_node->stage()->category() == ParExeStage::FU)
+								previous_load = *last_node;
+					}
+				}
+			}
 		}
 
 		void build(void) override {			
@@ -203,13 +229,14 @@ namespace otawa { namespace xilinxR5 {
 			ASSERTP(exec_lsu_fu, "No LSU fu found");
 
 			// Build the execution graph 
-			ParExeGraph::createSequenceResources();
-			ParExeGraph::createNodes();
-			add_edges_for_pipeline_order_and_fetch();
-			add_edges_for_program_order();
-			ParExeGraph::addEdgesForMemoryOrder(); // TODO: memory order for consecutive str is not required. add me cost
-			ParExeGraph::addEdgesForDataDependencies(); // TODO: rewrite and add latency values. data cache support pending
-			ParExeGraph::addEdgesForQueues();
+			createSequenceResources();
+			createNodes();
+			addEdgesForPipelineOrder();
+			addEdgesForFetch();
+			addEdgesForProgramOrder();
+			addEdgesForMemoryOrder();
+			addEdgesForDataDependencies(); // TODO: rewrite and add latency values. data cache support pending
+			addEdgesForQueues();
 		}
 
 		
