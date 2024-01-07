@@ -101,7 +101,7 @@ namespace otawa { namespace xilinxR5 {
 				throw Exception("ARM loader with otawa::arm::INFO is required !");
 			mem = hard::MEMORY_FEATURE.get(ws);
 			ASSERTP(mem, "Memory feature not found");
-			cout << mem->worstWriteTime() << " " << mem->worstReadTime() << endl;
+			//cout << mem->worstWriteTime() << " " << mem->worstReadTime() << endl;
 			const hard::CacheConfiguration *cconf = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
 			// if(!cconf)
 			// 	throw Exception("no cache");
@@ -110,13 +110,42 @@ namespace otawa { namespace xilinxR5 {
 			// 	throw Exception("no data cache");
 		}
 
+		ParExeNode* find_exec_stage(ParExeInst* inst, int num) {
+			if (num == 1) {
+				return inst->lastFUNode();
+			} else if (num == 2) {
+				for (ParExeInst::NodeIterator node(inst); node(); node++)
+					if(node->stage() == stage[EXE_2])
+						return *node;
+			}
+			return nullptr;
+		}
+
+		ParExeNode* find_mem_stage(ParExeInst* inst) {
+			for (ParExeInst::NodeIterator node(inst); node(); node++) {
+					if(node->stage() == _microprocessor->memStage())
+						return *node;
+			}
+			return nullptr;
+		}
+
+		ParExeNode* find_wr_stage(ParExeInst* inst) {
+			for (ParExeInst::NodeIterator node(inst); node(); node++) {
+					if(node->stage() == stage[WR])
+						return *node;
+			}
+			return nullptr;
+		}
+
+
 		void addEdgesForFetch() override {
 			ParExeGraph::addEdgesForFetch();
 
 			ParExeInst* prev_inst = 0;
 			for (InstIterator inst(this); inst(); inst++) {
+				// get cycle_time_info of inst
 				void* inst_info = info->decode(inst->inst());
-				xilinx_r5_time_t* inst_time = xilinx_r5_time(inst_info);
+				xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
 				info->free(inst_info);
 
 				// Update fetch edges with misprediction branch penalties
@@ -124,7 +153,7 @@ namespace otawa { namespace xilinxR5 {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
 						if (!prev_inst->inst()->target()) { // Should be true for indirect branches. TODO: check it
-							delay = inst_time->br_penalty;
+							delay = inst_cycle_timing->br_penalty;
 							if (delay >= 2) 
 								new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
 						}
@@ -136,18 +165,22 @@ namespace otawa { namespace xilinxR5 {
 
 		void addEdgesForPipelineOrder() override {
 			for (InstIterator inst(this); inst(); inst++) {
+				// get cycle_time_info of inst
 				void* inst_info = info->decode(inst->inst());
-				xilinx_r5_time_t* inst_time = xilinx_r5_time(inst_info);
+				xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
 				info->free(inst_info);
-
+				
 				ParExeNode* prev_node = nullptr;
 				// Add edges that represent the order of stages in the pipeline
 				for (ParExeInst::NodeIterator node(*inst); node(); node++) {
 					if (prev_node)
-						new ParExeEdge(prev_node, *node, ParExeEdge::SOLID, 0, "pipeline order");
-					if (node->stage()->name().startsWith("EXEC_")) {  // execution stage 
-						node->setLatency(inst_time->ex_cost); // TODO: find why sometimes, the node latency is increased: ben
-						cout << node->latency() << " " << node->stage()->name() <<endl;
+						new ParExeEdge(prev_node, *node, ParExeEdge::SOLID, 0, "Pipeline order");
+					
+					// set execution stages latentcy
+					if (node->stage() == stage[EXE_1]) {
+						node->setLatency(inst_cycle_timing->ex_cost - (inst_cycle_timing->ex_cost / 2));
+					} else if (node->stage() == stage[EXE_2]) {
+						node->setLatency(inst_cycle_timing->ex_cost / 2);
 					}
 					prev_node = *node;
 				}
@@ -190,40 +223,118 @@ namespace otawa { namespace xilinxR5 {
 				}
 			}
 		}
+		
+		void addEdgesForDataDependencies() override {
+			string data_dep("");
+			ParExeStage* exec_stage = _microprocessor->execStage();
+			// for each functional unit
+			for (int j = 0; j < exec_stage->numFus(); j++) {
+				ParExeStage* fu_stage = exec_stage->fu(j)->firstStage();
+				
+				// for each stage in the functional unit
+				for (int k=0; k < fu_stage->numNodes(); k++) {
+					ParExeNode* node = fu_stage->node(k);
+					ParExeInst* inst = node->inst();
+
+					// get cycle_time_info of the instruction
+					void* inst_info = info->decode(inst->inst());
+					xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
+					info->free(inst_info);
+					// get operand-register type
+					operand_type_t reg_type = inst_cycle_timing->operand_type;
+					// for each instruction producing a used data
+					for (ParExeInst::ProducingInstIterator prod(inst); prod(); prod ++) {
+						// Calculate the stall duration of the stage according to the operand-register's type and result latency					
+						
+						// get cycle_time_info of the producer instruction
+						void* producer_inst_info = info->decode(prod->inst());
+						xilinx_r5_time_t* producer_cycle_timing = xilinx_r5_time(producer_inst_info);
+						info->free(producer_inst_info);
+						
+						int stall_duration = 0;
+						ParExeNode* requiring_node = nullptr;
+						if (reg_type == NORMAL_REG) {
+							data_dep = "NR Dependency";
+							// the used data is required at EXE_2 stage
+							requiring_node = find_exec_stage(inst, 2);
+							stall_duration = producer_cycle_timing->result_latency - producer_cycle_timing->ex_cost;
+						} else if (reg_type == LATE_REG) {
+							data_dep = "LR Dependency";
+							// the used data is not required until the start of wr stage
+							requiring_node = find_wr_stage(inst);
+							stall_duration = producer_cycle_timing->result_latency -1 - producer_cycle_timing->ex_cost;
+						} else if (reg_type == EARLY_REG) {
+							data_dep = "ER Dependency";
+							// the used data is required at EXE_1 stage
+							requiring_node = find_exec_stage(inst, 1);
+							stall_duration = producer_cycle_timing->result_latency + 1;
+						} else if (reg_type == VERY_EARLY_REG) {
+							data_dep = "VER Dependency";
+							// the used data is required at Issue(EXE_1) stage.
+							requiring_node = find_exec_stage(inst, 1);
+							stall_duration = producer_cycle_timing->result_latency + 2;
+						} else if (reg_type == UNDEFINED) {
+							// do nothing for now
+						}
+						ParExeNode* producing_node = nullptr;
+						if(!prod->inst()->isLoad())
+							producing_node = find_exec_stage(*prod, 2);
+						else
+							producing_node = find_mem_stage(*prod);
+						
+						// In the case of negative value of stall duration, we need to reduce the latency value of the producer node
+						if (stall_duration < 0) {
+							producing_node->setLatency(producing_node->latency() - elm::abs(stall_duration));
+							stall_duration = 0;
+						}
+						// create the edge
+						if (producing_node != nullptr && requiring_node != nullptr) 
+							new ParExeEdge(producing_node, requiring_node, ParExeEdge::SOLID, stall_duration, data_dep);
+					}
+				}
+			}
+		}
 
 		void build(void) override {			
 			// Look for FUs
-			stage[NO] = 0;
 			for(ParExePipeline::StageIterator pipeline_stage(_microprocessor->pipeline()); pipeline_stage(); pipeline_stage++) {
 				if(pipeline_stage->name() == "PreFetch") {
 					stage[FE] = *pipeline_stage;
-				} else if(pipeline_stage->name() == "EXE") {
-					// stage[EXE] = *pipeline_stage;
+				} else if(pipeline_stage->name() == "Decode") {
+					stage[DE] = *pipeline_stage;
+				} else if(pipeline_stage->name() == "EXE_1") {
+					_microprocessor->setExecStage(*pipeline_stage);
+					// stage[EXE_1] = *pipeline_stage;
 					for(int i = 0; i < pipeline_stage->numFus(); i++) {
 						ParExePipeline *fu = pipeline_stage->fu(i);
 						if (fu->firstStage()->name().startsWith("EXEC_F")) {
 							exec_f_fu = fu;
-							stage[EXE] = fu->firstStage();
+							stage[EXE_1] = fu->firstStage();
 						}
 						else if (fu->firstStage()->name().startsWith("EXEC_DPU")) {
 							exec_dpu_fu = fu;
-							stage[EXE] = fu->firstStage();
+							stage[EXE_1] = fu->firstStage();
 						}
 						else if (fu->firstStage()->name().startsWith("EXEC_LSU")) {
 							exec_lsu_fu = fu;
-							stage[EXE] = fu->firstStage();
+							stage[EXE_1] = fu->firstStage();
 						}
 						else
 							ASSERTP(false, fu->firstStage()->name());
 						
 					}
-				} else if(pipeline_stage->name() == "WR") {
+				} else if(pipeline_stage->name() == "EXE_2") {
+					stage[EXE_2] = *pipeline_stage;
+				} else if(pipeline_stage->name() == "Write") {
 					stage[WR] = *pipeline_stage;
-				}
+				} 
+
 			}
 			ASSERTP(stage[FE], "No 'Prefetch' stage found");
-			ASSERTP(stage[EXE], "No 'EXE' stage found");
-			ASSERTP(stage[WR], "No 'Write back' stage found"); // This is maybe not required
+			ASSERTP(stage[DE], "No 'Decode' stage found");
+			ASSERTP(stage[EXE_1], "No 'EXE_1' stage found");
+			ASSERTP(stage[EXE_2], "No 'EXE_2' stage found");
+			ASSERTP(stage[WR], "No 'Write back' stage found");
 			ASSERTP(exec_f_fu, "No FPU fu found");
 			ASSERTP(exec_dpu_fu, "No DPU fu found");
 			ASSERTP(exec_lsu_fu, "No LSU fu found");
@@ -235,14 +346,13 @@ namespace otawa { namespace xilinxR5 {
 			addEdgesForFetch();
 			addEdgesForProgramOrder();
 			addEdgesForMemoryOrder();
-			addEdgesForDataDependencies(); // TODO: rewrite and add latency values. data cache support pending
-			addEdgesForQueues();
+			addEdgesForDataDependencies();
 		}
 
 		
 	private:
 		otawa::arm::Info* info;
-		const hard::Memory *mem;
+		const hard::Memory* mem;
 		ParExeStage* stage[CNT];
 		ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
 	};
@@ -279,6 +389,7 @@ namespace otawa { namespace xilinxR5 {
 										.maker<BBTimerXilinxR5>();
 	
 	/* plugin hook */
+	// TODO: check if this is necessary
 	ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinxR5", OTAWA_PROC_VERSION)
 										.version(Version(1, 0, 0))
 										.hook(OTAWA_PROC_NAME);

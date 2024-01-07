@@ -15,27 +15,39 @@
 		<stage id="FE">
 			<name>PreFetch</name>
 			<type>FETCH</type>
+			<width>2</width>
 		</stage>
-		<stage id="EXE">
-			<name>EXE</name>
+		<stage id="DE">
+			<name>Decode</name>
+			<type>LAZY</type>
+			<width>2</width>
+		</stage>
+		
+		<stage id="EXE_1">
+			<name>EXE_1</name>
 			<type>EXEC</type>
 			<ordered>true</ordered>
+			<!-- <width>2</width> -->
 			<fus>
 				<fu id="EXEC_F"> <!-- FPU -->
 					<name>EXEC_F</name>
-					<pipelined>false</pipelined>
+					<pipelined>true</pipelined>
+					<!-- <width>2</width> -->
 					<!-- <latency>96</latency> doc : 1, 453 -->
 				</fu>
 				<fu id="EXEC_DPU"> <!-- DPU -->
 					<name>EXEC_DPU</name>
-					<pipelined>false</pipelined>
+					<pipelined>true</pipelined>
+					<!-- <width>2</width> -->
 					<!-- <latency>9</latency> doc : 1, 428 -->
 				</fu>
 				<fu id="EXEC_LSU"> <!-- DPU -->
 					<name>EXEC_LSU</name>
-					<pipelined>false</pipelined>
-					<!-- <latency>9</latency> doc : 1, 428 -->
+					<pipelined>true</pipelined>
 					<mem>true</mem>
+					<!-- <width>2</width> -->
+					<!-- <latency>9</latency> doc : 1, 428 -->
+					
 				</fu>
 			</fus>
 			<dispatch>
@@ -47,25 +59,33 @@
 			</dispatch>
 			
 		</stage> 
+		<stage id="EXE_2">
+			<name>EXE_2</name>
+			<type>EXEC</type>
+			<!-- <width>2</width> -->
+			<ordered>true</ordered>
+			<pipelined>true</pipelined>
+		</stage>
 		<stage id="WR">
 			<name>Write</name>
 			<type>COMMIT</type>
-			<width>1</width>
+			<width>2</width>
 			<latency>0</latency>
+			<mem>true</mem>
 		</stage>
 	</stages>
 	<!-- TODO: add queue page 165-->
-	<!-- <queues>
-		<queue>
+	<queues>
+		<!-- <queue>
 			<name>FE_QUEUE</name>
 			<size>3</size>
 			<output ref="FE"/>
-		</queue>
-		<queue>
+		</queue> -->
+		<!-- <queue>
 			<name>DPU_QUEUE</name>
 			<size>8</size>
 			<input ref="FE"/>
 			<output ref="EXE"/>
-		</queue>
-	</queues> -->
+		</queue> -->
+	</queues> 
 </processor>
