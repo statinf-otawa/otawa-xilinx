@@ -1,5 +1,7 @@
 canon int(32) "time_parallel_data"
 canon int(32) "time_branch"
+canon int(32) "time_branch_x"
+canon int(32) "time_tbb_tbh"
 canon int(32) "time_data_normal"
 canon int(32) "time_data_pc"
 canon int(32) "time_data_shift"
@@ -45,8 +47,14 @@ extend CMP_shr, CMN_shr, TEQ_shr, TST_shr
 	arm7_time = { if shifter_operand.reg_shift then time("time_data_shift"); else time("time_data_normal"); endif; }
 
 
-extend B_Cond, BX_ARM, SWI
+extend B_Cond, SWI
 	arm7_time = { time("time_branch"); }
+
+extend BX_ARM
+	arm7_time = { time("time_branch_x"); }
+
+extend TBB_TBH
+	arm7_time = { time("time_tbb_tbh"); }
 
 extend SWP
 	arm7_time = { time("time_swp"); }

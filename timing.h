@@ -19,39 +19,39 @@ typedef enum {
 
 const t::uint32
 	NONE  = 0x00,
-	MULTI = 0x01, // Not needed for now. gliss2|nmp file should maybe be updated first. TODO:  Re-read the doc: URGENT
+	MULTI = 0x01, // Not needed for now. gliss2|nmp file should maybe be updated first.
 	LOAD  = 0x02,
 	STORE = 0x04,
 	SWP   = 0x10; // TODO: doc about this : URGENT
 
 typedef struct {
-	int ex_cost; // Is "cycle" value in Arm cortexr5_trm, page 425. "This is the minimum number of cycles required to issue an instruction. Issue cycles that produce memory
-				 // accesses to the cache are included"
-	int result_latency; // Is "Result latency" value in Arm cortexr5_trm, page 425. TODO: this is not maybe required. re-read the doc. URGENT!!!
-	int br_penalty; // TODO: find where  it is defined in datasheet
+	int ex_cost; // Is "cycle" value in Arm cortexr5_trm, page 425. 
+	int result_latency; // Is "Result latency" value in Arm cortexr5_trm, page 425.
+	int br_penalty; // TODO: find where it is defined in datasheet
 	operand_type_t operand_type;
 	t::uint32 flags;
 } xilinx_r5_time_t;
 
-// TODO: Rewrite the next 18 lines
-// TODO: branch instructions need to be rewritten with more granularity
-xilinx_r5_time_t time_parallel_data = {/* EXE, NO, */ 1, 1, 1, /*1,*/UNDEFINED, MULTI        };		    // Parallel Data
-xilinx_r5_time_t time_data_normal 	= {/* EXE, NO, */ 1, 1, 1, /*1,*/NORMAL_REG, NONE            };				// Data Op (normal)	... doc 7,428 
-xilinx_r5_time_t time_data_shift 	= {/* EXE, NO, */ 2, 1, 1, /*1,*/EARLY_REG, NONE            };				// Data Op (shift)	2c in EXE
-xilinx_r5_time_t time_data_pc 		= {/* NO, EXE, */ 1, 1, 1, /*1,*/NORMAL_REG, NONE            };
-xilinx_r5_time_t time_data_shift_pc	= {/* NO, EXE, */ 9, 1, 1, /*1,*/EARLY_REG, NONE            };
-xilinx_r5_time_t time_ldr_normal 	= {/* EXE, NO, */ 1, 1, 1, /*1,*/VERY_EARLY_REG, LOAD         };			// LDR (normal)		register produced in EXE, possible bus contention
-xilinx_r5_time_t time_ldr_unaligned	= {/* EXE, NO, */ 2, 1, 1, /*1,*/UNDEFINED, LOAD         };			// LDR (unaligned)	register produced in EXE, 2c in EXE, possible bus contention on 1c
-xilinx_r5_time_t time_ldr_pc 		= {/* NO, EXE, */ 1, 1, 1, /*1,*/VERY_EARLY_REG, LOAD         };			// LDR (to pc)		4c in EXE, (cur.EXE, next.FE), possible bus contention on 1c
-xilinx_r5_time_t time_str_normal	= {/* NO, NO,  */ 1, 1, 1, /*1,*/LATE_REG, STORE        };			// STR				possible bus contention on EXE
-xilinx_r5_time_t time_ldm_x1 		= {/* EXE, NO, */ 1, 1, 1, /*1,*/VERY_EARLY_REG, LOAD         };			// LDM	(x1)		2c in EXE, load on 1c, possible bus contention
-xilinx_r5_time_t time_ldm_xn 		= {/* EXE, NO, */ 1, 1, 1, /*1,*/VERY_EARLY_REG, LOAD | MULTI };	// LDM (xn)			nc in EXE, load on 1c, possible bus contention. We will need N value. if not possible, consider max=4
-xilinx_r5_time_t time_ldm_xn_pc		= {/* EXE, EXE,*/ 1, 1, 1, /*1,*/VERY_EARLY_REG, LOAD | MULTI };	// LDM (xn, pc)		nc + 4 in EXE, load on 1c, possible bus contention, (cur.EXE, next.FE)
-xilinx_r5_time_t time_stm_x1 		= {/* NO, NO,  */ 1, 1, 1, /*1,*/NORMAL_REG, STORE        };			// STM (x1)			2c in EXE, possible bus contention
-xilinx_r5_time_t time_stm_xn		= {/* NO, NO,  */ 1, 1, 1, /*1,*/LATE_REG, STORE | MULTI};	// STM (xn)			nc in EXE, possible bus contention
-xilinx_r5_time_t time_swp 			= {/* EXE, NO, */ 1, 1, 1, /*1,*/VERY_EARLY_REG, SWP          };			// SWP (normal)		2c in EXE, possible bus contention
-xilinx_r5_time_t time_branch 		= {/* NO, EXE, */ 1, 1, 1, /*1,*/UNDEFINED, NONE            };				// B, SWI			2c in EXE
-xilinx_r5_time_t time_mult	 		= {/* EXE, NO, */ 5, 1, 1, /*1,*/EARLY_REG, NONE            };				// MUL, MULA		2 + m in EXE
-xilinx_r5_time_t time_mult_long		= {/* EXE, NO, */ 6, 1, 1, /*1,*/EARLY_REG, NONE            };				// MUL long			3 + m
-xilinx_r5_time_t time_unexec 		= {/* NO, NO,  */ 1, 1, 1, /*1,*/VERY_EARLY_REG, NONE            };				// conditional instruction not executed
+
+xilinx_r5_time_t time_parallel_data = {1, 1, 1, UNDEFINED, MULTI             };
+xilinx_r5_time_t time_data_normal 	= {1, 1, 1, NORMAL_REG, NONE             };
+xilinx_r5_time_t time_data_shift 	= {1, 1, 1, EARLY_REG, NONE              };
+xilinx_r5_time_t time_data_pc 		= {9, 1, 1, NORMAL_REG, NONE             };
+xilinx_r5_time_t time_data_shift_pc	= {9, 1, 1, EARLY_REG, NONE              };
+xilinx_r5_time_t time_ldr_normal 	= {3, 4, 1, VERY_EARLY_REG, LOAD         };
+xilinx_r5_time_t time_ldr_unaligned	= {4, 5, 1, VERY_EARLY_REG, LOAD              }; // This needs to be rewritten. Separate amd1c from am1c
+xilinx_r5_time_t time_ldr_pc 		= {11, 11, 1, VERY_EARLY_REG, LOAD         }; // This needs to be rewritten. Separate amd1c from am1c
+xilinx_r5_time_t time_str_normal	= {3, 4, 1, LATE_REG, STORE              };
+xilinx_r5_time_t time_ldm_x1 		= {1, 2, 1, VERY_EARLY_REG, LOAD         };
+xilinx_r5_time_t time_ldm_xn 		= {4, 5, 1, VERY_EARLY_REG, LOAD | MULTI };	// LDM (xn).	 We will need n value. if not possible, consider max=7
+xilinx_r5_time_t time_ldm_xn_pc		= {1+8, 9, 1, VERY_EARLY_REG, LOAD | MULTI };	// LDM (xn, pc)
+xilinx_r5_time_t time_stm_x1 		= {1, 2, 1, NORMAL_REG, STORE            }; // STM (x1)
+xilinx_r5_time_t time_stm_xn		= {4, 5, 1, LATE_REG, STORE | MULTI      };
+xilinx_r5_time_t time_swp 			= {2, 3, 1, VERY_EARLY_REG, SWP          };
+xilinx_r5_time_t time_branch 		= {1, 1, 8, UNDEFINED, NONE              };
+xilinx_r5_time_t time_branch_x	    = {1, 1, 9, UNDEFINED, NONE              };
+xilinx_r5_time_t time_tbb_tbh       = {9, 9, 9, UNDEFINED, NONE              };
+xilinx_r5_time_t time_mult	 		= {2, 3, 1, EARLY_REG, NONE              };
+xilinx_r5_time_t time_mult_long		= {2, 3, 1, EARLY_REG, NONE              };
+xilinx_r5_time_t time_unexec 		= {10, 10, 1, VERY_EARLY_REG, NONE         };
 #include "xilinxR5_time.h"
