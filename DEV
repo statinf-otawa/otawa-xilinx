@@ -6,10 +6,7 @@ This implementation attempts to support the WCET computation for:
 
 ===== TODO =====
 
-    - update all micro architecture descriptions (xml file) with latency if available: done
-    - write the otawa-plugin for all processing units (Urgently for the Cortex R5 RPU) : 90% done
-    - Rewrite the instruction timing description (in the nmp file and the cost in the cpp file) : 50% done
-    - Add result latency edges : 0% done 
+    
 
 ==== Main reference (to be updated) =====
 
