@@ -267,12 +267,12 @@ namespace otawa { namespace xilinxR5 {
 							data_dep = "ER Dependency";
 							// the used data is required at EXE_1 stage
 							requiring_node = find_exec_stage(inst, 1);
-							stall_duration = producer_cycle_timing->result_latency + 1;
+							stall_duration = producer_cycle_timing->result_latency + 1 - producer_cycle_timing->ex_cost;
 						} else if (reg_type == VERY_EARLY_REG) {
 							data_dep = "VER Dependency";
 							// the used data is required at Issue(EXE_1) stage.
 							requiring_node = find_exec_stage(inst, 1);
-							stall_duration = producer_cycle_timing->result_latency + 2;
+							stall_duration = producer_cycle_timing->result_latency + 2 - producer_cycle_timing->ex_cost;
 						} else if (reg_type == UNDEFINED) {
 							// do nothing for now
 						}
