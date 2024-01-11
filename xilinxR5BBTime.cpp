@@ -255,39 +255,46 @@ namespace otawa { namespace xilinxR5 {
 					// get cycle_time_info of the instruction
 					xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
 
+					// Get the dependency type of the instruction  and also calculate the ajustment value (offset)
+					// of the result latency of the instruction procuding the used data
 					operand_type_t reg_type = inst_cycle_timing->operand_type;
+					ParExeNode* requiring_node = nullptr;
+					t::int32 offset = 0;
+					if (reg_type == NORMAL_REG) {
+						data_dep = "NR Dependency";
+						// the used data is required at EXE_2 stage
+						requiring_node = find_exec_stage(inst, 2);
+					} else if (reg_type == LATE_REG) {
+						data_dep = "LR Dependency";
+						// Subtract one cycle from the Result Latency of the instruction producing this register
+						offset = -1;
+						// the used data is not required until the start of wr stage
+						requiring_node = find_wr_stage(inst);
+					} else if (reg_type == EARLY_REG) {
+						data_dep = "ER Dependency";
+						// Add one cycle to the Result Latency of the instruction producing this register
+						offset = 1;
+						// the used data is required at EXE_1 stage
+						requiring_node = find_exec_stage(inst, 1);
+					} else if (reg_type == VERY_EARLY_REG) {
+						data_dep = "VER Dependency";
+						// "Add two cycles to the Result Latency of the instruction producing this register ..."
+						// But we will just overestimate here by adding 2 cycles all times
+						offset = 2;
+						// the used data is required at Issue(EXE_1) stage.
+						requiring_node = find_exec_stage(inst, 1);
+					} else if (reg_type == UNDEFINED) {
+						// do nothing for now
+					}
+
 					// for each instruction producing a used data
 					for (ParExeInst::ProducingInstIterator prod(inst); prod(); prod ++) {
-						// Calculate the stall duration of the stage according to the operand-register's type and result latency					
-						
+
 						// get cycle_time_info of the producer instruction
 						xilinx_r5_time_t* producer_cycle_timing = get_inst_cycle_timing_info(prod->inst());
-						
-						int stall_duration = 0;
-						ParExeNode* requiring_node = nullptr;
-						if (reg_type == NORMAL_REG) {
-							data_dep = "NR Dependency";
-							// the used data is required at EXE_2 stage
-							requiring_node = find_exec_stage(inst, 2);
-							stall_duration = producer_cycle_timing->result_latency - producer_cycle_timing->ex_cost;
-						} else if (reg_type == LATE_REG) {
-							data_dep = "LR Dependency";
-							// the used data is not required until the start of wr stage
-							requiring_node = find_wr_stage(inst);
-							stall_duration = producer_cycle_timing->result_latency -1 - producer_cycle_timing->ex_cost;
-						} else if (reg_type == EARLY_REG) {
-							data_dep = "ER Dependency";
-							// the used data is required at EXE_1 stage
-							requiring_node = find_exec_stage(inst, 1);
-							stall_duration = producer_cycle_timing->result_latency + 1 - producer_cycle_timing->ex_cost;
-						} else if (reg_type == VERY_EARLY_REG) {
-							data_dep = "VER Dependency";
-							// the used data is required at Issue(EXE_1) stage.
-							requiring_node = find_exec_stage(inst, 1);
-							stall_duration = producer_cycle_timing->result_latency + 2 - producer_cycle_timing->ex_cost;
-						} else if (reg_type == UNDEFINED) {
-							// do nothing for now
-						}
+						// Calculate the stall duration of the stage
+						int stall_duration = producer_cycle_timing->result_latency - producer_cycle_timing->ex_cost + offset;
+						// Find the stage node producing the data
 						ParExeNode* producing_node = nullptr;
 						if(!prod->inst()->isLoad())
 							producing_node = find_exec_stage(*prod, 2);
