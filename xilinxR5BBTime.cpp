@@ -23,6 +23,15 @@
 #include <otawa/prop/DynIdentifier.h>
 #include <otawa/loader/arm.h>
 #include "timing.h"
+#include <otawa/etime/StandardEventBuilder.h>
+#include <otawa/hard/Processor.h>
+#include <otawa/hard/CacheConfiguration.h>
+#include <otawa/cache/cat2/features.h>
+#include <otawa/cache/LBlockSet.h>
+#include <otawa/hard/Memory.h>
+#include <otawa/hard/BHT.h>
+#include <otawa/ilp.h>
+#include <otawa/ipet.h>
 
 namespace otawa { namespace xilinxR5 {
 	extern p::id<int> INSTRUCTION_TIME; // instruction cost in cycles
@@ -92,7 +101,7 @@ namespace otawa { namespace xilinxR5 {
 	public:
 
 		ExeGraph(WorkSpace *ws, ParExeProc *proc, Vector<Resource *> *hw_resources, 
-					ParExeSequence *seq, const PropList &props) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), exec_dpu_fu(0), exec_f_fu(0) {
+					ParExeSequence *seq, const PropList &props) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0) {
 			
 			// Try to find arm loader with arm information
 			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
@@ -136,6 +145,17 @@ namespace otawa { namespace xilinxR5 {
 			}
 			return nullptr;
 		}
+		/*
+			This function attempts to decode an instruction and return the corresponding behavior "cycle timing behavior".
+			"cycle timing behavior" of instructions are provided at the section B of 
+			'Cortex ™ -R5 and Cortex-R5F Revision: r1p1 Technical Reference Manual'
+		*/
+		xilinx_r5_time_t* get_inst_cycle_timing_info(Inst* inst) {
+			void* inst_info = info->decode(inst);
+			xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
+			info->free(inst_info);
+			return inst_cycle_timing;
+		}
 
 
 		void addEdgesForFetch() override {
@@ -144,9 +164,7 @@ namespace otawa { namespace xilinxR5 {
 			ParExeInst* prev_inst = 0;
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
-				void* inst_info = info->decode(inst->inst());
-				xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
-				info->free(inst_info);
+				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
 
 				// Update fetch edges with misprediction branch penalties
 				if (prev_inst && prev_inst->inst()->isControl()) {
@@ -166,9 +184,7 @@ namespace otawa { namespace xilinxR5 {
 		void addEdgesForPipelineOrder() override {
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
-				void* inst_info = info->decode(inst->inst());
-				xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
-				info->free(inst_info);
+				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
 				
 				ParExeNode* prev_node = nullptr;
 				// Add edges that represent the order of stages in the pipeline
@@ -237,19 +253,15 @@ namespace otawa { namespace xilinxR5 {
 					ParExeInst* inst = node->inst();
 
 					// get cycle_time_info of the instruction
-					void* inst_info = info->decode(inst->inst());
-					xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
-					info->free(inst_info);
-					// get operand-register type
+					xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
+
 					operand_type_t reg_type = inst_cycle_timing->operand_type;
 					// for each instruction producing a used data
 					for (ParExeInst::ProducingInstIterator prod(inst); prod(); prod ++) {
 						// Calculate the stall duration of the stage according to the operand-register's type and result latency					
 						
 						// get cycle_time_info of the producer instruction
-						void* producer_inst_info = info->decode(prod->inst());
-						xilinx_r5_time_t* producer_cycle_timing = xilinx_r5_time(producer_inst_info);
-						info->free(producer_inst_info);
+						xilinx_r5_time_t* producer_cycle_timing = get_inst_cycle_timing_info(prod->inst());
 						
 						int stall_duration = 0;
 						ParExeNode* requiring_node = nullptr;
@@ -284,7 +296,7 @@ namespace otawa { namespace xilinxR5 {
 						
 						// In the case of negative value of stall duration, we need to reduce the latency value of the producer node
 						if (stall_duration < 0) {
-							producing_node->setLatency(producing_node->latency() - elm::abs(stall_duration));
+							// producing_node->setLatency(producing_node->latency() - elm::abs(stall_duration));
 							stall_duration = 0;
 						}
 						// create the edge
