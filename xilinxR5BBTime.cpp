@@ -117,7 +117,7 @@ namespace otawa { namespace xilinxR5 {
 				if (prev_inst && prev_inst->inst()->isControl()) {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
-						if (!prev_inst->inst()->target()) { // Should be true for indirect branches. TODO: check it
+						if (!prev_inst->inst()->target()) {
 							delay = inst_cycle_timing->br_penalty;
 							if (delay >= 2) 
 								new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
@@ -140,9 +140,9 @@ namespace otawa { namespace xilinxR5 {
 						new ParExeEdge(prev_node, *node, ParExeEdge::SOLID, 0, "Pipeline order");
 					
 					// set execution stages latentcy
-					if (node->stage() == stage[EXE_1]) {
+					if (is_stage_one(node->stage())) {
 						node->setLatency(inst_cycle_timing->ex_cost - (inst_cycle_timing->ex_cost / 2));
-					} else if (node->stage() == stage[EXE_2]) {
+					} else if (is_stage_two(node->stage())) {
 						node->setLatency(inst_cycle_timing->ex_cost / 2);
 					}
 					prev_node = *node;
@@ -222,14 +222,14 @@ namespace otawa { namespace xilinxR5 {
 						// Add one cycle to the Result Latency of the instruction producing this register
 						offset = 1;
 						// the used data is required at EXE_1 stage
-						requiring_node = find_exec_stage(inst, 1);
+						requiring_node = node;
 					} else if (reg_type == VERY_EARLY_REG) {
 						data_dep = "VER Dependency";
 						// "Add two cycles to the Result Latency of the instruction producing this register ..."
 						// But we will just overestimate here by adding 2 cycles all times
 						offset = 2;
 						// the used data is required at Issue(EXE_1) stage.
-						requiring_node = find_exec_stage(inst, 1);
+						requiring_node = node;
 					} else if (reg_type == UNDEFINED) {
 						// do nothing for now
 					}
@@ -267,6 +267,23 @@ namespace otawa { namespace xilinxR5 {
 		*/
 		void add_latencies_for_data_cache_miss() {
 
+			for (InstIterator inst(this); inst(); inst++) {
+				// get cycle_time_info of inst
+				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
+
+				if (inst_cycle_timing->flags & (STORE|LOAD)) {
+
+					ot::time latency = get_cost_of_mem_access(inst->inst());
+
+					for (ParExeInst::NodeIterator node(*inst); node(); node++) {
+						if (is_stage_one(node->stage())) {
+							node->setLatency(node->latency() + latency - (latency / 2));
+						} else if (is_stage_two(node->stage())) {
+							node->setLatency(node->latency() + (latency / 2));
+						}
+					}
+				}
+			}
 		}
 
 		void build(void) override {			
@@ -278,20 +295,17 @@ namespace otawa { namespace xilinxR5 {
 					stage[DE] = *pipeline_stage;
 				} else if(pipeline_stage->name() == "EXE_1") {
 					_microprocessor->setExecStage(*pipeline_stage);
-					// stage[EXE_1] = *pipeline_stage;
+					stage[EXE_1] = *pipeline_stage;
 					for(int i = 0; i < pipeline_stage->numFus(); i++) {
 						ParExePipeline *fu = pipeline_stage->fu(i);
 						if (fu->firstStage()->name().startsWith("EXEC_F")) {
 							exec_f_fu = fu;
-							stage[EXE_1] = fu->firstStage();
 						}
 						else if (fu->firstStage()->name().startsWith("EXEC_DPU")) {
 							exec_dpu_fu = fu;
-							stage[EXE_1] = fu->firstStage();
 						}
 						else if (fu->firstStage()->name().startsWith("EXEC_LSU")) {
 							exec_lsu_fu = fu;
-							stage[EXE_1] = fu->firstStage();
 						}
 						else
 							ASSERTP(false, fu->firstStage()->name());
@@ -321,6 +335,7 @@ namespace otawa { namespace xilinxR5 {
 			addEdgesForProgramOrder();
 			addEdgesForMemoryOrder();
 			addEdgesForDataDependencies();
+			add_latencies_for_data_cache_miss();
 		}
 
 		
@@ -336,13 +351,12 @@ namespace otawa { namespace xilinxR5 {
 			    num: Number of the execution stage.
 		*/
 		ParExeNode* find_exec_stage(ParExeInst* inst, int num) {
-			if (num == 1) {
-				return inst->lastFUNode();
-			} else if (num == 2) {
-				for (ParExeInst::NodeIterator node(inst); node(); node++)
-					if(node->stage() == stage[EXE_2])
-						return *node;
-			}
+			for (ParExeInst::NodeIterator node(inst); node(); node++)
+				if (num == 1 && is_stage_one(node->stage()))
+					return *node;
+				else if (num == 2 && is_stage_two(node->stage()))
+					return *node;
+
 			return nullptr;
 		}
 
@@ -390,7 +404,7 @@ namespace otawa { namespace xilinxR5 {
 			return inst_n_reg;
 		}
 
-		ot::time get_cost_of_mem_access(Inst* inst, t::uint32 op) {
+		ot::time get_cost_of_mem_access(Inst* inst) {
 			xilinx_r5_time_t* inst_ct = get_inst_cycle_timing_info(inst);
 			bool write = inst_ct->flags & STORE;
 			const hard::Bank* bank = mem->get(inst->address());
@@ -401,6 +415,14 @@ namespace otawa { namespace xilinxR5 {
 				cost = write ? mem->worstWriteTime() : mem->worstReadTime();
 			}
 			return cost * get_inst_n_reg(inst);
+		}
+
+		bool is_stage_one(ParExeStage* stage) {
+			return stage->isFuStage(); // only exe_1 stage has FUs
+		}
+
+		bool is_stage_two(ParExeStage* _stage) {
+			return _stage == stage[EXE_2];
 		}
 	};
 
@@ -436,7 +458,6 @@ namespace otawa { namespace xilinxR5 {
 										.maker<BBTimerXilinxR5>();
 	
 	/* plugin hook */
-	// TODO: check if this is necessary
 	ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinxR5", OTAWA_PROC_VERSION)
 										.version(Version(1, 0, 0))
 										.hook(OTAWA_PROC_NAME);
