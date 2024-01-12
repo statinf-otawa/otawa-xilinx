@@ -6,6 +6,7 @@ set(FILES	"zynq/memory.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
 set(SOURCES
 	xilinxR5BBTime.cpp
     xilinxR5_time.h
+	xilinxR5_operand.h
 	timing.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
@@ -45,6 +46,13 @@ add_custom_command(
 	OUTPUT "xilinxR5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
 	ARGS ${IRG} -o xilinxR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unexec);" -e otawa_time.nmp -p
+	VERBATIM
+)
+
+add_custom_command(
+	OUTPUT "xilinxR5_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
+	COMMAND ${GLISS_ATTR}
+	ARGS ${IRG} -o xilinxR5_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
 	VERBATIM
 )
 

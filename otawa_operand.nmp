@@ -1,0 +1,3 @@
+macro op(x) = "SET_OP"(x)
+extend STM, LDM
+	arm7_op = { op("elm::ones"(reglist)); }
