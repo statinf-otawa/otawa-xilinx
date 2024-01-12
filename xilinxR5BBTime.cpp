@@ -23,15 +23,7 @@
 #include <otawa/prop/DynIdentifier.h>
 #include <otawa/loader/arm.h>
 #include "timing.h"
-#include <otawa/etime/StandardEventBuilder.h>
-#include <otawa/hard/Processor.h>
-#include <otawa/hard/CacheConfiguration.h>
-#include <otawa/cache/cat2/features.h>
-#include <otawa/cache/LBlockSet.h>
-#include <otawa/hard/Memory.h>
-#include <otawa/hard/BHT.h>
-#include <otawa/ilp.h>
-#include <otawa/ipet.h>
+#include "xilinxR5_operand.h"
 
 namespace otawa { namespace xilinxR5 {
 	extern p::id<int> INSTRUCTION_TIME; // instruction cost in cycles
@@ -108,55 +100,10 @@ namespace otawa { namespace xilinxR5 {
 			info = id(_ws->process());
 			if(!info)
 				throw Exception("ARM loader with otawa::arm::INFO is required !");
+			// Get memory configuration
 			mem = hard::MEMORY_FEATURE.get(ws);
 			ASSERTP(mem, "Memory feature not found");
-			//cout << mem->worstWriteTime() << " " << mem->worstReadTime() << endl;
-			const hard::CacheConfiguration *cconf = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
-			// if(!cconf)
-			// 	throw Exception("no cache");
-			// const hard::Cache *dcache = cconf->dataCache();
-			// if (!dcache)
-			// 	throw Exception("no data cache");
 		}
-
-		ParExeNode* find_exec_stage(ParExeInst* inst, int num) {
-			if (num == 1) {
-				return inst->lastFUNode();
-			} else if (num == 2) {
-				for (ParExeInst::NodeIterator node(inst); node(); node++)
-					if(node->stage() == stage[EXE_2])
-						return *node;
-			}
-			return nullptr;
-		}
-
-		ParExeNode* find_mem_stage(ParExeInst* inst) {
-			for (ParExeInst::NodeIterator node(inst); node(); node++) {
-					if(node->stage() == _microprocessor->memStage())
-						return *node;
-			}
-			return nullptr;
-		}
-
-		ParExeNode* find_wr_stage(ParExeInst* inst) {
-			for (ParExeInst::NodeIterator node(inst); node(); node++) {
-					if(node->stage() == stage[WR])
-						return *node;
-			}
-			return nullptr;
-		}
-		/*
-			This function attempts to decode an instruction and return the corresponding behavior "cycle timing behavior".
-			"cycle timing behavior" of instructions are provided at the section B of 
-			'Cortex ™ -R5 and Cortex-R5F Revision: r1p1 Technical Reference Manual'
-		*/
-		xilinx_r5_time_t* get_inst_cycle_timing_info(Inst* inst) {
-			void* inst_info = info->decode(inst);
-			xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
-			info->free(inst_info);
-			return inst_cycle_timing;
-		}
-
 
 		void addEdgesForFetch() override {
 			ParExeGraph::addEdgesForFetch();
@@ -313,6 +260,14 @@ namespace otawa { namespace xilinxR5 {
 				}
 			}
 		}
+		/*
+			For all instructions performing a read or write, 
+			this function adds a penalty representing the cost of 
+			accessing memory considering 'data-cache miss' 
+		*/
+		void add_latencies_for_data_cache_miss() {
+
+		}
 
 		void build(void) override {			
 			// Look for FUs
@@ -374,6 +329,79 @@ namespace otawa { namespace xilinxR5 {
 		const hard::Memory* mem;
 		ParExeStage* stage[CNT];
 		ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
+
+		/*
+			Find an specific execution stage of an instruction.
+			    inst: Concerned instruction.
+			    num: Number of the execution stage.
+		*/
+		ParExeNode* find_exec_stage(ParExeInst* inst, int num) {
+			if (num == 1) {
+				return inst->lastFUNode();
+			} else if (num == 2) {
+				for (ParExeInst::NodeIterator node(inst); node(); node++)
+					if(node->stage() == stage[EXE_2])
+						return *node;
+			}
+			return nullptr;
+		}
+
+		/*
+			Find the Mem stage of an instruction.
+			    inst: Concerned instruction.
+		*/
+		ParExeNode* find_mem_stage(ParExeInst* inst) {
+			for (ParExeInst::NodeIterator node(inst); node(); node++) {
+					if(node->stage() == _microprocessor->memStage())
+						return *node;
+			}
+			return nullptr;
+		}
+
+		/*
+			Find the WB stage of an instruction.
+			    inst: Concerned instruction.
+		*/
+		ParExeNode* find_wr_stage(ParExeInst* inst) {
+			for (ParExeInst::NodeIterator node(inst); node(); node++) {
+					if(node->stage() == stage[WR])
+						return *node;
+			}
+			return nullptr;
+		}
+		/*
+			Attempts to decode an instruction and return the corresponding behavior "cycle timing behavior".
+			"cycle timing behavior" of instructions are provided at the section B of 
+			'Cortex ™ -R5 and Cortex-R5F Revision: r1p1 Technical Reference Manual'
+			
+			    inst: Instruction decode.
+		*/
+		xilinx_r5_time_t* get_inst_cycle_timing_info(Inst* inst) {
+			void* inst_info = info->decode(inst);
+			xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
+			info->free(inst_info);
+			return inst_cycle_timing;
+		}
+
+		t::uint32 get_inst_n_reg(Inst* inst) {
+			void* inst_info = info->decode(inst);
+			t::uint32 inst_n_reg = xilinx_r5_n_reg(inst_info);
+			info->free(inst_info);
+			return inst_n_reg;
+		}
+
+		ot::time get_cost_of_mem_access(Inst* inst, t::uint32 op) {
+			xilinx_r5_time_t* inst_ct = get_inst_cycle_timing_info(inst);
+			bool write = inst_ct->flags & STORE;
+			const hard::Bank* bank = mem->get(inst->address());
+			ot::time cost = 0;
+			if (bank) {
+				cost = write ? bank->writeLatency() : bank->readLatency();
+			} else {
+				cost = write ? mem->worstWriteTime() : mem->worstReadTime();
+			}
+			return cost * get_inst_n_reg(inst);
+		}
 	};
 
 

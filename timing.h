@@ -33,7 +33,7 @@ typedef struct {
 } xilinx_r5_time_t;
 
 
-xilinx_r5_time_t time_parallel_data = {1, 1, 1, UNDEFINED, MULTI             };
+xilinx_r5_time_t time_parallel_data = {1, 1, 1, UNDEFINED, NONE             };
 xilinx_r5_time_t time_data_normal 	= {1, 1, 1, NORMAL_REG, NONE             };
 xilinx_r5_time_t time_data_shift 	= {1, 1, 1, EARLY_REG, NONE              };
 xilinx_r5_time_t time_data_pc 		= {9, 1, 1, NORMAL_REG, NONE             };
