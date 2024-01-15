@@ -27,30 +27,22 @@
 			<name>EXE</name>
 			<type>EXEC</type>
 			<ordered>true</ordered>
-			<!-- <width>2</width> -->
 			<fus>
 				<fu id="EXEC_F"> <!-- FPU -->
 					<name>EXEC_F</name>
 					<pipelined>true</pipelined>
 					<latency>2</latency>
-					<!-- <width>2</width> -->
-					<!-- <latency>96</latency> doc : 1, 453 -->
 				</fu>
 				<fu id="EXEC_DPU"> <!-- DPU -->
 					<name>EXEC_DPU</name>
 					<pipelined>true</pipelined>
 					<latency>2</latency>
-					<!-- <width>2</width> -->
-					<!-- <latency>9</latency> doc : 1, 428 -->
 				</fu>
 				<fu id="EXEC_LSU"> <!-- DPU -->
 					<name>EXEC_LSU</name>
 					<pipelined>true</pipelined>
 					<latency>2</latency>
 					<mem>true</mem>
-					<!-- <width>2</width> -->
-					<!-- <latency>9</latency> doc : 1, 428 -->
-					
 				</fu>
 			</fus>
 			<dispatch>
@@ -71,18 +63,4 @@
 			<mem>true</mem>
 		</stage>
 	</stages>
-	<!-- TODO: add queue page 165-->
-	<queues>
-		<!-- <queue>
-			<name>FE_QUEUE</name>
-			<size>3</size>
-			<output ref="FE"/>
-		</queue> -->
-		<!-- <queue>
-			<name>DPU_QUEUE</name>
-			<size>8</size>
-			<input ref="FE"/>
-			<output ref="EXE"/>
-		</queue> -->
-	</queues> 
 </processor>

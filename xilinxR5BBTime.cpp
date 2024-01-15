@@ -112,15 +112,12 @@ namespace otawa { namespace xilinxR5 {
 
 			ParExeInst* prev_inst = 0;
 			for (InstIterator inst(this); inst(); inst++) {
-				// get cycle_time_info of inst
-				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
-
 				// Update fetch edges with misprediction branch penalties
 				if (prev_inst && prev_inst->inst()->isControl()) {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
 						if (!prev_inst->inst()->target()) {
-							delay = inst_cycle_timing->br_penalty;
+							delay = get_inst_cycle_timing_info(inst->inst())->br_penalty;
 							if (delay >= 2) 
 								new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
 						}
@@ -261,7 +258,6 @@ namespace otawa { namespace xilinxR5 {
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
 				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
-
 				if (inst_cycle_timing->flags & (STORE|LOAD)) {
 
 					ot::time latency = get_cost_of_mem_access(inst->inst());
