@@ -2,10 +2,9 @@
 typedef enum {
 	FE    = 0,
 	DE    = 1,
-	EXE_1 = 2,
-	EXE_2 = 3,
-	WR    = 4,
-	CNT   = 5
+	EXE   = 2,
+	WR    = 3,
+	CNT   = 4
 } pipeline_stage_t;
 
 typedef enum {

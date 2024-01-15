@@ -23,8 +23,8 @@
 			<width>2</width>
 		</stage>
 		
-		<stage id="EXE_1">
-			<name>EXE_1</name>
+		<stage id="EXE">
+			<name>EXE</name>
 			<type>EXEC</type>
 			<ordered>true</ordered>
 			<!-- <width>2</width> -->
@@ -32,18 +32,21 @@
 				<fu id="EXEC_F"> <!-- FPU -->
 					<name>EXEC_F</name>
 					<pipelined>true</pipelined>
+					<latency>2</latency>
 					<!-- <width>2</width> -->
 					<!-- <latency>96</latency> doc : 1, 453 -->
 				</fu>
 				<fu id="EXEC_DPU"> <!-- DPU -->
 					<name>EXEC_DPU</name>
 					<pipelined>true</pipelined>
+					<latency>2</latency>
 					<!-- <width>2</width> -->
 					<!-- <latency>9</latency> doc : 1, 428 -->
 				</fu>
 				<fu id="EXEC_LSU"> <!-- DPU -->
 					<name>EXEC_LSU</name>
 					<pipelined>true</pipelined>
+					<latency>2</latency>
 					<mem>true</mem>
 					<!-- <width>2</width> -->
 					<!-- <latency>9</latency> doc : 1, 428 -->
@@ -59,13 +62,7 @@
 			</dispatch>
 			
 		</stage> 
-		<stage id="EXE_2">
-			<name>EXE_2</name>
-			<type>EXEC</type>
-			<!-- <width>2</width> -->
-			<ordered>true</ordered>
-			<pipelined>true</pipelined>
-		</stage>
+
 		<stage id="WR">
 			<name>Write</name>
 			<type>COMMIT</type>

@@ -24,7 +24,8 @@
 #include <otawa/loader/arm.h>
 #include "timing.h"
 #include "xilinxR5_operand.h"
-
+#define OCM_ACCESS_LATENCY 30
+#define FUs_NUM_STAGE 2
 namespace otawa { namespace xilinxR5 {
 	extern p::id<int> INSTRUCTION_TIME; // instruction cost in cycles
 
@@ -50,6 +51,7 @@ namespace otawa { namespace xilinxR5 {
 	*/
 
 	class WCETDefByIT : public BBProcessor {
+		// Not needed actually. It is here only for tests
 	public:
 		static p::declare reg;
 
@@ -129,24 +131,13 @@ namespace otawa { namespace xilinxR5 {
 		}
 
 		void addEdgesForPipelineOrder() override {
+			ParExeGraph::addEdgesForPipelineOrder();
+			// Add latency penalty to Exec-FU nodes
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
 				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
-				
-				ParExeNode* prev_node = nullptr;
-				// Add edges that represent the order of stages in the pipeline
-				for (ParExeInst::NodeIterator node(*inst); node(); node++) {
-					if (prev_node)
-						new ParExeEdge(prev_node, *node, ParExeEdge::SOLID, 0, "Pipeline order");
-					
-					// set execution stages latentcy
-					if (is_stage_one(node->stage())) {
-						node->setLatency(inst_cycle_timing->ex_cost - (inst_cycle_timing->ex_cost / 2));
-					} else if (is_stage_two(node->stage())) {
-						node->setLatency(inst_cycle_timing->ex_cost / 2);
-					}
-					prev_node = *node;
-				}
+				inst->firstFUNode()->setLatency(inst_cycle_timing->ex_cost - (inst_cycle_timing->ex_cost / 2));
+				inst->lastFUNode()->setLatency(inst_cycle_timing->ex_cost / 2);
 			}
 		}
 
@@ -210,7 +201,7 @@ namespace otawa { namespace xilinxR5 {
 					if (reg_type == NORMAL_REG) {
 						data_dep = "NR Dependency";
 						// the used data is required at EXE_2 stage
-						requiring_node = find_exec_stage(inst, 2);
+						requiring_node = inst->lastFUNode();
 					} else if (reg_type == LATE_REG) {
 						data_dep = "LR Dependency";
 						// Subtract one cycle from the Result Latency of the instruction producing this register
@@ -244,7 +235,7 @@ namespace otawa { namespace xilinxR5 {
 						// Find the stage node producing the data
 						ParExeNode* producing_node = nullptr;
 						if(!prod->inst()->isLoad())
-							producing_node = find_exec_stage(*prod, 2);
+							producing_node = prod->lastFUNode();
 						else
 							producing_node = find_mem_stage(*prod);
 						
@@ -274,14 +265,8 @@ namespace otawa { namespace xilinxR5 {
 				if (inst_cycle_timing->flags & (STORE|LOAD)) {
 
 					ot::time latency = get_cost_of_mem_access(inst->inst());
-
-					for (ParExeInst::NodeIterator node(*inst); node(); node++) {
-						if (is_stage_one(node->stage())) {
-							node->setLatency(node->latency() + latency - (latency / 2));
-						} else if (is_stage_two(node->stage())) {
-							node->setLatency(node->latency() + (latency / 2));
-						}
-					}
+					ParExeNode* first_fu_node = inst->firstFUNode();
+					first_fu_node->setLatency(first_fu_node->latency() + latency);
 				}
 			}
 		}
@@ -293,9 +278,9 @@ namespace otawa { namespace xilinxR5 {
 					stage[FE] = *pipeline_stage;
 				} else if(pipeline_stage->name() == "Decode") {
 					stage[DE] = *pipeline_stage;
-				} else if(pipeline_stage->name() == "EXE_1") {
+				} else if(pipeline_stage->name() == "EXE") {
 					_microprocessor->setExecStage(*pipeline_stage);
-					stage[EXE_1] = *pipeline_stage;
+					stage[EXE] = *pipeline_stage;
 					for(int i = 0; i < pipeline_stage->numFus(); i++) {
 						ParExePipeline *fu = pipeline_stage->fu(i);
 						if (fu->firstStage()->name().startsWith("EXEC_F")) {
@@ -311,8 +296,6 @@ namespace otawa { namespace xilinxR5 {
 							ASSERTP(false, fu->firstStage()->name());
 						
 					}
-				} else if(pipeline_stage->name() == "EXE_2") {
-					stage[EXE_2] = *pipeline_stage;
 				} else if(pipeline_stage->name() == "Write") {
 					stage[WR] = *pipeline_stage;
 				} 
@@ -320,12 +303,15 @@ namespace otawa { namespace xilinxR5 {
 			}
 			ASSERTP(stage[FE], "No 'Prefetch' stage found");
 			ASSERTP(stage[DE], "No 'Decode' stage found");
-			ASSERTP(stage[EXE_1], "No 'EXE_1' stage found");
-			ASSERTP(stage[EXE_2], "No 'EXE_2' stage found");
+			ASSERTP(stage[EXE], "No 'EXE' stage found");
 			ASSERTP(stage[WR], "No 'Write back' stage found");
 			ASSERTP(exec_f_fu, "No FPU fu found");
+			ASSERTP(exec_f_fu->numStages() == FUs_NUM_STAGE, "Wrong number of stages of FPU")
 			ASSERTP(exec_dpu_fu, "No DPU fu found");
+			ASSERTP(exec_dpu_fu->numStages() == FUs_NUM_STAGE, "Wrong number of stages of DPU")
 			ASSERTP(exec_lsu_fu, "No LSU fu found");
+			ASSERTP(exec_lsu_fu->numStages() == FUs_NUM_STAGE, "Wrong number of stages of LSU")
+			
 
 			// Build the execution graph 
 			createSequenceResources();
@@ -345,20 +331,6 @@ namespace otawa { namespace xilinxR5 {
 		ParExeStage* stage[CNT];
 		ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
 
-		/*
-			Find an specific execution stage of an instruction.
-			    inst: Concerned instruction.
-			    num: Number of the execution stage.
-		*/
-		ParExeNode* find_exec_stage(ParExeInst* inst, int num) {
-			for (ParExeInst::NodeIterator node(inst); node(); node++)
-				if (num == 1 && is_stage_one(node->stage()))
-					return *node;
-				else if (num == 2 && is_stage_two(node->stage()))
-					return *node;
-
-			return nullptr;
-		}
 
 		/*
 			Find the Mem stage of an instruction.
@@ -408,21 +380,7 @@ namespace otawa { namespace xilinxR5 {
 			xilinx_r5_time_t* inst_ct = get_inst_cycle_timing_info(inst);
 			bool write = inst_ct->flags & STORE;
 			const hard::Bank* bank = mem->get(inst->address());
-			ot::time cost = 0;
-			if (bank) {
-				cost = write ? bank->writeLatency() : bank->readLatency();
-			} else {
-				cost = write ? mem->worstWriteTime() : mem->worstReadTime();
-			}
-			return cost * get_inst_n_reg(inst);
-		}
-
-		bool is_stage_one(ParExeStage* stage) {
-			return stage->isFuStage(); // only exe_1 stage has FUs
-		}
-
-		bool is_stage_two(ParExeStage* _stage) {
-			return _stage == stage[EXE_2];
+			return ot::time((OCM_ACCESS_LATENCY - 9) * get_inst_n_reg(inst));
 		}
 	};
 
