@@ -6,14 +6,13 @@
 - Files and folders's are supposed to be renamed later.
 - This README will also be apdated
 - This is a WIP.
-- The ARMv7-r (cortex R5F) for [Xilinx ZCU 102](https://drive.google.com/file/d/1tGO_EcPoMxhlQ6fq65_nAHACKT17WFPU/view?usp=drive_link) is ready to be tested  but is still WIP.
-
+- The support of the ARMv7-r (cortex R5F) for [Xilinx ZCU 102](https://drive.google.com/file/d/1tGO_EcPoMxhlQ6fq65_nAHACKT17WFPU/view?usp=drive_link) is completed. Review ongoing
 ### Dependencies
 
 You need to build/install :
 - the [OTAWA](https://github.com/statinf-otawa/otawa-project) framework
 - [armv7t](https://github.com/statinf-otawa/armv7t/tree/master)
-- otawa [loader]() for arm 
+- otawa [loader](https://git.renater.fr/anonscm/git/otawa/otawa-arm.git) for arm 
 
 ### Build
 
