@@ -1,4 +1,3 @@
-// TODO: Rewrite all instruction timing. Re-read the doc: URGENT
 typedef enum {
 	FE    = 0,
 	DE    = 1,
@@ -26,7 +25,7 @@ const t::uint32
 typedef struct {
 	int ex_cost; // Is "cycle" value in Arm cortexr5_trm, page 425. 
 	int result_latency; // Is "Result latency" value in Arm cortexr5_trm, page 425.
-	int br_penalty; // TODO: find where it is defined in datasheet
+	int br_penalty; 
 	operand_type_t operand_type;
 	t::uint32 flags;
 } xilinx_r5_time_t;
@@ -38,8 +37,8 @@ xilinx_r5_time_t time_data_shift 	= {1, 1, 1, EARLY_REG, NONE                };
 xilinx_r5_time_t time_data_pc 		= {9, 1, 1, NORMAL_REG, NONE               };
 xilinx_r5_time_t time_data_shift_pc	= {9, 1, 1, EARLY_REG, NONE                };
 xilinx_r5_time_t time_ldr_normal 	= {3, 4, 1, VERY_EARLY_REG, LOAD           };
-xilinx_r5_time_t time_ldr_unaligned	= {4, 5, 1, VERY_EARLY_REG, LOAD           }; // This needs to be rewritten. Separate amd1c from am1c
-xilinx_r5_time_t time_ldr_pc 		= {11, 11, 1, VERY_EARLY_REG, LOAD         }; // This needs to be rewritten. Separate amd1c from am1c
+xilinx_r5_time_t time_ldr_unaligned	= {4, 5, 1, VERY_EARLY_REG, LOAD           }; // This needs to be rewritten. Separate amd1c from amd3c
+xilinx_r5_time_t time_ldr_pc 		= {11, 11, 1, VERY_EARLY_REG, LOAD         }; // This needs to be rewritten. Separate amd1c from amd3c
 xilinx_r5_time_t time_str_normal	= {3, 4, 1, LATE_REG, STORE                };
 xilinx_r5_time_t time_ldm_x1 		= {1, 2, 1, VERY_EARLY_REG, LOAD           };
 xilinx_r5_time_t time_ldm_xn 		= {4, 5, 1, VERY_EARLY_REG, LOAD | MULTI   }; // LDM (xn).	 We will need n value. if not possible, consider max=7

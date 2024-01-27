@@ -18,77 +18,17 @@
  *	along with OTAWA; if not, write to the Free Software
  *	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+#include <otawa/events/StandardEventBuilder.h>
 #include <otawa/etime/EdgeTimeBuilder.h>
 #include <otawa/prop/DynIdentifier.h>
+#include <otawa/dcache/features.h>
+#include <elm/sys/Path.h>
 #include <otawa/loader/arm.h>
 #include "timing.h"
 #include "xilinxR5_operand.h"
-#define OCM_ACCESS_LATENCY 30
+#define OCM_ACCESS_LATENCY 23 // https://support.xilinx.com/s/question/0D52E00006hpZz4SAE/ocm-latency-vs-l2-cache-latency?language=en_US
 #define FUs_NUM_STAGE 2
 namespace otawa { namespace xilinxR5 {
-	extern p::id<int> INSTRUCTION_TIME; // instruction cost in cycles
-
-	/*
-	* This plugin contains several xilinxR5 analyzes for WCET computation
-	*/
-
-	/**
-	*			 WCETDefByIT Analysis:
-	* Compute the time of blocks considering that each instruction takes the same amount of time (default to 5 cycles)
-	* or as defined by the configuration property @ref INSTRUCTION_TIME.
-	*
-	* Required features:
-	* @li @ref otawa::COLLECTED_CFG_FEATURE
-	*
-	* Provided features:
-	* @li @ref ipet::BB_TIME_FEATURE
-	*
-	* Configuration properties:
-	* @li @ref INSTRUCTION_TIME
-	*
-	* @ingroup xilinxR5
-	*/
-
-	class WCETDefByIT : public BBProcessor {
-		// Not needed actually. It is here only for tests
-	public:
-		static p::declare reg;
-
-		WCETDefByIT(p::declare &r = reg) : BBProcessor(r), itime(5) { }
-
-		virtual void configure(const PropList &props) {
-			BBProcessor::configure(props);
-			itime = INSTRUCTION_TIME(props);
-		}
-
-	protected:
-		virtual void processBB(WorkSpace *fw, CFG *cfg, Block *bb) {
-			if (!bb->isBasic())
-				ipet::TIME(bb) = 0;
-			else
-				ipet::TIME(bb) = itime * bb->toBasic()->count();
-		}
-
-		virtual void collectStats(WorkSpace *ws) {
-			record(new ipet::TimeStat(ws));
-		}
-
-		virtual void destroy(WorkSpace *ws, CFG *cfg, Block *b) {
-			ipet::TIME(b).remove();
-		}
-
-	private:
-		int itime;
-	};
-
-	p::declare WCETDefByIT::reg = p::init("otawa::xilinxR5::WCETDefByIT", Version(1, 0, 0))
-		.base(BBProcessor::reg)
-		.maker<WCETDefByIT>()
-		.provide(ipet::BB_TIME_FEATURE);
-
-	// This configuration property provides the time of an instruction in cycles.
-	p::id<int> INSTRUCTION_TIME("otawa::xilinxR5::INSTRUCTION_TIME", 5);
 
 
 	class ExeGraph: public etime::EdgeTimeGraph {
@@ -100,7 +40,7 @@ namespace otawa { namespace xilinxR5 {
 			// Try to find arm loader with arm information
 			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
 			info = id(_ws->process());
-			if(!info)
+			if (!info)
 				throw Exception("ARM loader with otawa::arm::INFO is required !");
 			// Get memory configuration
 			mem = hard::MEMORY_FEATURE.get(ws);
@@ -231,7 +171,7 @@ namespace otawa { namespace xilinxR5 {
 						int stall_duration = producer_cycle_timing->result_latency - producer_cycle_timing->ex_cost + offset;
 						// Find the stage node producing the data
 						ParExeNode* producing_node = nullptr;
-						if(!prod->inst()->isLoad())
+						if (!prod->inst()->isLoad())
 							producing_node = prod->lastFUNode();
 						else
 							producing_node = find_mem_stage(*prod);
@@ -253,7 +193,7 @@ namespace otawa { namespace xilinxR5 {
 			this function adds a penalty representing the cost of 
 			accessing memory considering 'data-cache miss' 
 		*/
-		void add_latencies_for_data_cache_miss() {
+		void addLatenciesForDataCacheMiss() {
 
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
@@ -269,15 +209,15 @@ namespace otawa { namespace xilinxR5 {
 
 		void build(void) override {			
 			// Look for FUs
-			for(ParExePipeline::StageIterator pipeline_stage(_microprocessor->pipeline()); pipeline_stage(); pipeline_stage++) {
-				if(pipeline_stage->name() == "PreFetch") {
+			for (ParExePipeline::StageIterator pipeline_stage(_microprocessor->pipeline()); pipeline_stage(); pipeline_stage++) {
+				if (pipeline_stage->name() == "PreFetch") {
 					stage[FE] = *pipeline_stage;
-				} else if(pipeline_stage->name() == "Decode") {
+				} else if (pipeline_stage->name() == "Decode") {
 					stage[DE] = *pipeline_stage;
-				} else if(pipeline_stage->name() == "EXE") {
+				} else if (pipeline_stage->name() == "EXE") {
 					_microprocessor->setExecStage(*pipeline_stage);
 					stage[EXE] = *pipeline_stage;
-					for(int i = 0; i < pipeline_stage->numFus(); i++) {
+					for (int i = 0; i < pipeline_stage->numFus(); i++) {
 						ParExePipeline *fu = pipeline_stage->fu(i);
 						if (fu->firstStage()->name().startsWith("EXEC_F")) {
 							exec_f_fu = fu;
@@ -292,7 +232,7 @@ namespace otawa { namespace xilinxR5 {
 							ASSERTP(false, fu->firstStage()->name());
 						
 					}
-				} else if(pipeline_stage->name() == "Write") {
+				} else if (pipeline_stage->name() == "Write") {
 					stage[WR] = *pipeline_stage;
 				} 
 
@@ -317,7 +257,7 @@ namespace otawa { namespace xilinxR5 {
 			addEdgesForProgramOrder();
 			addEdgesForMemoryOrder();
 			addEdgesForDataDependencies();
-			add_latencies_for_data_cache_miss();
+			// addLatenciesForDataCacheMiss();
 		}
 
 		
@@ -334,7 +274,7 @@ namespace otawa { namespace xilinxR5 {
 		*/
 		ParExeNode* find_mem_stage(ParExeInst* inst) {
 			for (ParExeInst::NodeIterator node(inst); node(); node++) {
-					if(node->stage() == _microprocessor->memStage())
+					if (node->stage() == _microprocessor->memStage())
 						return *node;
 			}
 			return nullptr;
@@ -346,7 +286,7 @@ namespace otawa { namespace xilinxR5 {
 		*/
 		ParExeNode* find_wr_stage(ParExeInst* inst) {
 			for (ParExeInst::NodeIterator node(inst); node(); node++) {
-					if(node->stage() == stage[WR])
+					if (node->stage() == stage[WR])
 						return *node;
 			}
 			return nullptr;
@@ -392,7 +332,26 @@ namespace otawa { namespace xilinxR5 {
 			_props = props;
 		}
 		void setup(WorkSpace* ws) override {
+			// Create the output directory for the ParExeGraphes. (Onlyfor debugging)
+			_dir = GRAPHS_OUTPUT_DIRECTORY(_props);
+			_dir = Path(ws->process()->program()->name()).dirPart().append(Path(GRAPHS_OUTPUT_DIRECTORY(_props)));
+			if (!_dir.exists())
+				_dir.makeDirs();
+
 			etime::EdgeTimeBuilder::setup(ws);
+			const hard::CacheConfiguration *cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
+			if (!cache_config)
+				throw ProcessorException(*this, "no cache");
+			dcache = cache_config->dataCache();
+			if (!dcache)
+				throw ProcessorException(*this, "no data cache");
+			icache = cache_config->instCache();
+			if (!icache)
+				throw ProcessorException(*this, "no instruction cache");
+			if (dcache == cache_config->instCache())
+				throw ProcessorException(*this, "unified L1 cache not supported");
+
+				
 		}
 
 		etime::EdgeTimeGraph* make(ParExeSequence* seq) override {
@@ -405,10 +364,14 @@ namespace otawa { namespace xilinxR5 {
 		}
 	private:
 		PropList _props;
+		sys::Path _dir; // directory ParExeGraph output
+		const hard::Cache *dcache, *icache;
+		hard::Memory *mem;
 	};
 
 	p::declare BBTimerXilinxR5::reg = p::init("otawa::xilinxR5::BBTimerXilinxR5", Version(1, 0, 0))
 										.extend<etime::EdgeTimeBuilder>()
+										.require(otawa::hard::CACHE_CONFIGURATION_FEATURE)
 										.maker<BBTimerXilinxR5>();
 	
 	/* plugin hook */
