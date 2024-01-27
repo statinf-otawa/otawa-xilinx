@@ -6,12 +6,12 @@
 	-->
 	<!-- DATA cache 32 KB Level 1 4-way set-associative data cache - doc : 2,31 
 	8-word cache line length, 4 ways set-associative, Pseudo-random cache replacement policy -->	
-	<!-- <dcache> 
+	<dcache> 
 		<block_bits>5</block_bits>
 		<way_bits>2</way_bits>
 		<row_bits>8</row_bits>
 		<replace>RANDOM</replace>
-	</dcache> -->
+	</dcache>
 	
 	<icache> <!-- 32 KB Level 1 4-way set-associative instruction cache -->
 		<block_bits>5</block_bits> <!--  8-word cache line length -->

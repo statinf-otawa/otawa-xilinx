@@ -39,19 +39,18 @@
 
 	<!-- SCRIPT ::= -->
 	<script>
-		<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="exegR5"/>
+		<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="ParExeGraph"/>
 		<config name="otawa::ipet::EXPLICIT" value="true"/>
 		<step require="otawa::VIRTUALIZED_CFG_FEATURE"/>
 
 		<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
 		<step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
 		<step require="otawa::hard::BHT_FEATURE"/>
+		<step require="otawa::dcache::CLP_ACCESS_FEATURE"/>
+		<step require="otawa::dcache::MAY_FEATURE"/>
+		<step require="otawa::dcache::CATEGORY_FEATURE"/>
+		<step require="otawa::dcache::EVENTS_FEATURE"/>
 
-
-		<!-- WCET computation -->
-		<!-- <step processor="otawa::xilinxR5::WCETDefByIT">
-			<config name="otawa::xilinxR5::INSTRUCTION_TIME" value="1"/>
-		</step>  -->
 		<step processor="otawa::xilinxR5::BBTimerXilinxR5"/>
 		<step require="otawa::ipet::WCET_FEATURE"/>	
 	</script>
