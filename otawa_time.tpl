@@ -16,7 +16,7 @@ typedef void (*fun_t)($(proc)_inst_t *inst);
 /*** function definition ***/
 
 static void xilinx_r5_time_UNKNOWN($(proc)_inst_t *inst) {
-	SET_TIME(time_unexec);
+	SET_TIME(time_unknown);
 }
 
 $(foreach instructions)

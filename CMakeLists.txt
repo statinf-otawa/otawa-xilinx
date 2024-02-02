@@ -45,7 +45,7 @@ message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 add_custom_command(
 	OUTPUT "xilinxR5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o xilinxR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unexec);" -e otawa_time.nmp -p
+	ARGS ${IRG} -o xilinxR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unknown);" -e otawa_time.nmp -p
 	VERBATIM
 )
 

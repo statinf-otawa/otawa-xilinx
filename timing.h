@@ -28,6 +28,7 @@ typedef struct {
 	int br_penalty; 
 	operand_type_t operand_type;
 	t::uint32 flags;
+	bool unknown = false;
 } xilinx_r5_time_t;
 
 
@@ -51,5 +52,5 @@ xilinx_r5_time_t time_branch_x	    = {1, 1, 9, UNDEFINED, NONE                };
 xilinx_r5_time_t time_tbb_tbh       = {9, 9, 9, UNDEFINED, NONE                };
 xilinx_r5_time_t time_mult	 		= {2, 3, 1, EARLY_REG, NONE                };
 xilinx_r5_time_t time_mult_long		= {2, 3, 1, EARLY_REG, NONE                };
-xilinx_r5_time_t time_unexec 		= {10, 10, 1, VERY_EARLY_REG, NONE         };
+xilinx_r5_time_t time_unknown 		= {15, 15, 15, VERY_EARLY_REG, NONE, true  };
 #include "xilinxR5_time.h"

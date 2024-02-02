@@ -24,18 +24,23 @@
 #include <otawa/dcache/features.h>
 #include <elm/sys/Path.h>
 #include <otawa/loader/arm.h>
+#include <elm/io/FileOutput.h>
+#include <elm/io/Output.h>
 #include "timing.h"
 #include "xilinxR5_operand.h"
 #define OCM_ACCESS_LATENCY 23 // https://support.xilinx.com/s/question/0D52E00006hpZz4SAE/ocm-latency-vs-l2-cache-latency?language=en_US
 #define FUs_NUM_STAGE 2
+#undef print//(t)//	print(t) // FIXME: this is to avoid print() macro replacements in ../armv7t/include/arm/config.h:21
 namespace otawa { namespace xilinxR5 {
-
-
+	extern p::id<bool> LOG;
+	using namespace elm::io;
+	
 	class ExeGraph: public etime::EdgeTimeGraph {
 	public:
-
+		
+		// static bool log_stream_is_open;
 		ExeGraph(WorkSpace *ws, ParExeProc *proc, Vector<Resource *> *hw_resources, 
-					ParExeSequence *seq, const PropList &props) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0) {
+					ParExeSequence *seq, const PropList &props, FileOutput* out) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0), _out(out) {
 			
 			// Try to find arm loader with arm information
 			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
@@ -199,11 +204,23 @@ namespace otawa { namespace xilinxR5 {
 				// get cycle_time_info of inst
 				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
 				if (inst_cycle_timing->flags & (STORE|LOAD)) {
-
 					ot::time latency = get_cost_of_mem_access(inst->inst());
 					ParExeNode* first_fu_node = inst->firstFUNode();
 					first_fu_node->setLatency(first_fu_node->latency() + latency);
 				}
+			}
+		}
+		/*
+			Write to the log file, some info about the instructions whose
+			cycle timing info has not been found.
+		*/
+		void dumpUnknowInst() {
+			if (_out == nullptr)
+				return;
+			for (InstIterator inst(this); inst(); inst++) {
+				if (!get_inst_cycle_timing_info(inst->inst())->unknown)
+					continue;
+				*_out << inst->inst()->address() << "; " << inst->inst() << endl;
 			}
 		}
 
@@ -258,6 +275,7 @@ namespace otawa { namespace xilinxR5 {
 			addEdgesForMemoryOrder();
 			addEdgesForDataDependencies();
 			// addLatenciesForDataCacheMiss();
+			dumpUnknowInst();
 		}
 
 		
@@ -266,8 +284,7 @@ namespace otawa { namespace xilinxR5 {
 		const hard::Memory* mem;
 		ParExeStage* stage[CNT];
 		ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
-
-
+		FileOutput* _out = nullptr;
 		/*
 			Find the Mem stage of an instruction.
 			    inst: Concerned instruction.
@@ -316,8 +333,10 @@ namespace otawa { namespace xilinxR5 {
 			xilinx_r5_time_t* inst_ct = get_inst_cycle_timing_info(inst);
 			bool write = inst_ct->flags & STORE;
 			const hard::Bank* bank = mem->get(inst->address());
-			return ot::time((OCM_ACCESS_LATENCY - 9) * get_inst_n_reg(inst));
+			return ot::time(OCM_ACCESS_LATENCY * get_inst_n_reg(inst));
 		}
+
+
 	};
 
 
@@ -332,12 +351,6 @@ namespace otawa { namespace xilinxR5 {
 			_props = props;
 		}
 		void setup(WorkSpace* ws) override {
-			// Create the output directory for the ParExeGraphes. (Onlyfor debugging)
-			_dir = GRAPHS_OUTPUT_DIRECTORY(_props);
-			_dir = Path(ws->process()->program()->name()).dirPart().append(Path(GRAPHS_OUTPUT_DIRECTORY(_props)));
-			if (!_dir.exists())
-				_dir.makeDirs();
-
 			etime::EdgeTimeBuilder::setup(ws);
 			const hard::CacheConfiguration *cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
 			if (!cache_config)
@@ -350,30 +363,50 @@ namespace otawa { namespace xilinxR5 {
 				throw ProcessorException(*this, "no instruction cache");
 			if (dcache == cache_config->instCache())
 				throw ProcessorException(*this, "unified L1 cache not supported");
-
-				
+			if (LOG(_props)) {
+				sys::Path log_file_path = sys::Path(ws->process()->program()->name() + ".log");
+				bool write_header = (log_file_path.exists()) ? false : true;
+				log_stream = new FileOutput(log_file_path, true);
+				if (write_header)
+					*log_stream << "########################################################" << endl
+								<< "# Static analysis on " << ws->process()->program()->name() << endl
+								<< "# Overestimated instructions" << endl
+								<< "# Address (hex); Instruction" << endl
+								<< "########################################################" << endl;
+				else
+					*log_stream << endl;	// sep
+			}
 		}
 
 		etime::EdgeTimeGraph* make(ParExeSequence* seq) override {
-			ExeGraph* graph = new ExeGraph(workspace(), _microprocessor, ressources(), seq, _props);
+			ExeGraph* graph = new ExeGraph(workspace(), _microprocessor, ressources(), seq, _props, log_stream);
 			graph->build();
 			return graph;
 		}
+
+
 		virtual void clean(ParExeGraph* graph) {
 			delete graph;
 		}
 	private:
 		PropList _props;
-		sys::Path _dir; // directory ParExeGraph output
 		const hard::Cache *dcache, *icache;
 		hard::Memory *mem;
+		FileOutput* log_stream = nullptr;
 	};
+
+	
 
 	p::declare BBTimerXilinxR5::reg = p::init("otawa::xilinxR5::BBTimerXilinxR5", Version(1, 0, 0))
 										.extend<etime::EdgeTimeBuilder>()
 										.require(otawa::hard::CACHE_CONFIGURATION_FEATURE)
 										.maker<BBTimerXilinxR5>();
 	
+
+	/**
+	* This configuration property allows the know if the log is required.
+	*/
+	p::id<bool> LOG("otawa::xilinxR5::LOG", false);
 	/* plugin hook */
 	ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinxR5", OTAWA_PROC_VERSION)
 										.version(Version(1, 0, 0))

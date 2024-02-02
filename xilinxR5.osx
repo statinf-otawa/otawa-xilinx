@@ -37,21 +37,42 @@
 		</bht>
 	</platform>
 
+	<configuration>
+		<item name="export_exec_graph" type="bool" default="true" label="Export the ParExeGraph">
+			<help>Export the Parametric Execution Graphes built during WCET computation.
+				User will have to create a directory named ParExeGraph in the directory he calls owcet from.
+				The graph will be saved in the directory.
+			</help>
+		</item>
+
+		<item name="log" type="bool" default="true" label="Write log file">
+			<help>By setting this to true, all warning messages occured during the execution of the feature xilinxR5::BBTimerXilinxR5
+				will be written into "program.log" file. "program" is the input binary file of owcet. 
+			</help>
+		</item>
+	</configuration>
 	<!-- SCRIPT ::= -->
 	<script>
-		<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="ParExeGraph"/>
+		<xsl:if test="$export_exec_graph!=0">
+			<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="ParExeGraph"/>
+		</xsl:if>
 		<config name="otawa::ipet::EXPLICIT" value="true"/>
-		<step require="otawa::VIRTUALIZED_CFG_FEATURE"/>
+		<step require="otawa::VIRTUALIZED_CFG_FEATURE"/> 
 
 		<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
 		<step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
 		<step require="otawa::hard::BHT_FEATURE"/>
 		<step require="otawa::dcache::CLP_ACCESS_FEATURE"/>
 		<step require="otawa::dcache::MAY_FEATURE"/>
+		<step require="otawa::dcache::PERS_FEATURE"/>
+		<step require="otawa::dcache::MUST_FEATURE"/>
+		<step require="otawa::dcache::MULTI_PERS_FEATURE"/>
 		<step require="otawa::dcache::CATEGORY_FEATURE"/>
 		<step require="otawa::dcache::EVENTS_FEATURE"/>
 
-		<step processor="otawa::xilinxR5::BBTimerXilinxR5"/>
+		<step processor="otawa::xilinxR5::BBTimerXilinxR5"> 
+			<config name="otawa::xilinxR5::LOG" value="{$log}"/>
+		</step>
 		<step require="otawa::ipet::WCET_FEATURE"/>	
 	</script>
 </otawa-script>
