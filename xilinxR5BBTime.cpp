@@ -30,7 +30,7 @@
 #include "xilinxR5_operand.h"
 #define OCM_ACCESS_LATENCY 23 // https://support.xilinx.com/s/question/0D52E00006hpZz4SAE/ocm-latency-vs-l2-cache-latency?language=en_US
 #define FUs_NUM_STAGE 2
-#undef print//(t)//	print(t) // FIXME: this is to avoid print() macro replacements in ../armv7t/include/arm/config.h:21
+#undef print
 namespace otawa { namespace xilinxR5 {
 	extern p::id<bool> LOG;
 	using namespace elm::io;
@@ -386,6 +386,7 @@ namespace otawa { namespace xilinxR5 {
 
 
 		virtual void clean(ParExeGraph* graph) {
+			log_stream->flush();
 			delete graph;
 		}
 	private:
