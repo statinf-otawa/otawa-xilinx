@@ -25,7 +25,6 @@
 #include <elm/sys/Path.h>
 #include <otawa/loader/arm.h>
 #include <elm/io/FileOutput.h>
-#include <elm/io/Output.h>
 #include "timing.h"
 #include "xilinxR5_operand.h"
 #define OCM_ACCESS_LATENCY 23 // https://support.xilinx.com/s/question/0D52E00006hpZz4SAE/ocm-latency-vs-l2-cache-latency?language=en_US
@@ -64,7 +63,7 @@ namespace otawa { namespace xilinxR5 {
 						if (!prev_inst->inst()->target()) {
 							delay = get_inst_cycle_timing_info(inst->inst())->br_penalty;
 							if (delay >= 2) 
-								new ParExeEdge(prev_inst->execNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
+								new ParExeEdge(prev_inst->firstFUNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
 						}
 					}
 				}
@@ -361,7 +360,7 @@ namespace otawa { namespace xilinxR5 {
 			icache = cache_config->instCache();
 			if (!icache)
 				throw ProcessorException(*this, "no instruction cache");
-			if (dcache == cache_config->instCache())
+			if (dcache == icache)
 				throw ProcessorException(*this, "unified L1 cache not supported");
 			if (LOG(_props)) {
 				sys::Path log_file_path = sys::Path(ws->process()->program()->name() + ".log");
@@ -374,7 +373,7 @@ namespace otawa { namespace xilinxR5 {
 								<< "# Address (hex); Instruction" << endl
 								<< "########################################################" << endl;
 				else
-					*log_stream << endl;	// sep
+					*log_stream << endl; // sep
 			}
 		}
 
