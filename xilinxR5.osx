@@ -28,7 +28,7 @@
 	<platform>
 		<xi:include href="zynq/pipeline_r5f.xml"/>
 		<xi:include href="zynq/cache_r5f.xml"/>
-		<xi:include href="zynq/memory.xml"/>
+		<xi:include href="zynq/memory_r5f.xml"/>
 		<bht> <!-- doc 2, 436 -->
 			<correct_taken_penalty>1</correct_taken_penalty>
 			<correct_not_taken_penalty>0</correct_not_taken_penalty>

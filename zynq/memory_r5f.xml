@@ -5,12 +5,13 @@
 		https://docs.xilinx.com/r/en-US/am011-versal-acap-trm/States?tocId=GE0VLeFxsGZJjgNsLJxNjg
         https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
         https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping
+        https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/System-level-Control-Registers TODO: read this
 	-->
     <banks> <!-- all doc: 3-->
         <bank>
             <name>OCM0</name> <!-- Bank 0 of On chip mem -->
-            <address><offset>0xFFFC0000</offset></address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
-            <size>0x10000</size> <!-- 64 Kbytes -->
+            <address><offset>0x0000</offset></address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
+            <size>0xFFFC0000</size> <!-- 64 Kbytes -->
             <type>DRAM</type> <!-- The docs says it's a RAM. I could not find if it is a SRAM or DRAM.
                                 But it should be DRAM because SRAM is usually used for cache mem -->
             <cached>false</cached>
