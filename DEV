@@ -17,3 +17,9 @@ This implementation attempts to support the WCET computation for:
     - https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
     - https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping
     - Cortex ™-R5 and Cortex-R5F Revision: r1p1 Technical Reference Manual 
+    - https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/Generic-Interrupt-Controller
+    - https://chipsandcheese.com/2023/05/28/arms-cortex-a53-tiny-but-important/
+    - https://hardwarebug.org/2014/05/15/cortex-a7-instruction-cycle-timings/
+    - https://docs.xilinx.com/r/en-US/am011-versal-acap-trm/States?tocId=GE0VLeFxsGZJjgNsLJxNjg
+    - https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
+    - https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping

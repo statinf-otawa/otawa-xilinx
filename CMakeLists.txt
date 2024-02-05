@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # configuration
 set(SCRIPT	"xilinxR5")
-set(FILES	"zynq/memory.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
+set(FILES	"zynq/memory_r5f.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
 set(SOURCES
 	xilinxR5BBTime.cpp
     xilinxR5_time.h

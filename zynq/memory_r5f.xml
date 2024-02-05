@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<memory>
+<memory
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
     <!-- DOCUMENTATION
-		https://docs.xilinx.com/r/en-US/am011-versal-acap-trm/States?tocId=GE0VLeFxsGZJjgNsLJxNjg
-        https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/On-chip-Memory-Functional-Description?section=XREF_95107
-        https://docs.xilinx.com/r/en-US/ug585-zynq-7000-SoC-TRM/Address-Mapping
         https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/System-level-Control-Registers TODO: read this
+        https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/Lock-step-Operation
 	-->
     <banks> <!-- all doc: 3-->
         <bank>
             <name>OCM0</name> <!-- Bank 0 of On chip mem -->
-            <address><offset>0x0000</offset></address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
+            <address><offset>0xFFFC0000</offset></address> <!-- Range is 0xFFFC_0000 to 0xFFFC_FFFF -->
             <size>0xFFFC0000</size> <!-- 64 Kbytes -->
             <type>DRAM</type> <!-- The docs says it's a RAM. I could not find if it is a SRAM or DRAM.
                                 But it should be DRAM because SRAM is usually used for cache mem -->
@@ -57,5 +58,102 @@
             <latency>23</latency>
             <writable>true</writable>
         </bank>
+
+        <bank>
+            <name>R5_i ATCM</name> <!-- R5_0/1 ATCM-->
+            <xsl:choose>
+                <xsl:when test="$core=0">
+                    <xsl:choose>
+                        <xsl:when test="$lock_step_mode=1">
+                            <xsl:choose>
+                                <xsl:when test="$local_address_view=1">
+                                    <address><offset>0x00000000</offset></address>
+                                </xsl:when>
+                                <xsl:when test="$local_address_view=0">
+                                    <address><offset>0xFFE00000</offset></address>
+                                </xsl:when>
+                            </xsl:choose>
+                            <size>0x100000</size> <!-- 128 Kbytes -->
+                        </xsl:when>
+                    
+                        <xsl:when test="$lock_step_mode=0">
+                            <xsl:choose>
+                                <xsl:when test="$local_address_view=1">
+                                    <address><offset>0x00000000</offset></address>
+                                </xsl:when>
+                                <xsl:when test="$local_address_view=0">
+                                    <address><offset>0xFFE00000</offset></address>
+                                </xsl:when>
+                            </xsl:choose>
+                            <size>0x10000</size> <!-- 64 Kbytes -->
+                        </xsl:when>
+                    </xsl:choose>
+                </xsl:when>
+
+                <xsl:when test="$core=1">
+                    <xsl:choose>
+                        <xsl:when test="$local_address_view=1">
+                            <address><offset>0x00000000</offset></address>
+                        </xsl:when>
+                        <xsl:when test="$local_address_view=0">
+                            <address><offset>0xFFE90000</offset></address>
+                        </xsl:when>
+                    </xsl:choose>
+                    <size>0x10000</size> <!-- 64 Kbytes -->
+                </xsl:when>
+            </xsl:choose>
+            <type>SPM</type>
+            <on_chip>true</on_chip>
+            <writable>true</writable>
+        </bank>
+
+
+        <bank>
+            <name>R5_i BTCM</name> <!-- R5_0/1 BTCM-->
+            <xsl:choose>
+                <xsl:when test="$core=0">
+                    <xsl:choose>
+                        <xsl:when test="$lock_step_mode=1">
+                            <xsl:choose>
+                                <xsl:when test="$local_address_view=1">
+                                    <address><offset>0x00020000</offset></address>
+                                </xsl:when>
+                                <xsl:when test="$local_address_view=0">
+                                    <address><offset>0xFFE20000</offset></address>
+                                </xsl:when>
+                            </xsl:choose>
+                            <size>0x100000</size> <!-- 128 Kbytes -->
+                        </xsl:when>
+                        <xsl:when test="$lock_step_mode=0">
+                            <xsl:choose>
+                                <xsl:when test="$local_address_view=1">
+                                    <address><offset>0x00020000</offset></address>
+                                </xsl:when>
+                                <xsl:when test="$local_address_view=0">
+                                    <address><offset>0xFFE20000</offset></address>
+                                </xsl:when>
+                            </xsl:choose>
+                            <size>0x10000</size> <!-- 64 Kbytes -->
+                        </xsl:when>
+                    </xsl:choose>
+                </xsl:when>
+
+                <xsl:when test="$core=1">
+                    <xsl:choose>
+                        <xsl:when test="$local_address_view=1">
+                            <address><offset>0x00000000</offset></address>
+                        </xsl:when>
+                        <xsl:when test="$local_address_view=0">
+                            <address><offset>0xFFE90000</offset></address>
+                        </xsl:when>
+                    </xsl:choose>
+                    <size>0x10000</size> <!-- 64 Kbytes -->
+                </xsl:when>
+            </xsl:choose>
+            <type>SPM</type>
+            <on_chip>true</on_chip>
+            <writable>true</writable>
+        </bank>
+
     </banks>
 </memory>

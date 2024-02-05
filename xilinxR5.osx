@@ -50,6 +50,25 @@
 				will be written into "program.log" file. "program" is the input binary file of owcet. 
 			</help>
 		</item>
+
+		<item name="local_address_view" type="bool" default="true" label="Use Local view for addresses">
+			<help>By setting this to true, The memory space desciption will use Core Local View to define the address of the memomry banks. If not set, 
+				the global address view will be used.
+			</help>
+		</item>
+
+		<item name="core" type="enum" label="Core id">
+			<help>Select the type of core ID (0 or 1).</help>
+			<value label="core 0" value="0" default="true"/>
+			<value label="core 1" value="1"/>
+		</item>
+
+		<item name="lock_step_mode" type="bool" default="true" label="Lock-step Operation">
+			<help>Setting this to true assumes that the processors are in the lock-step-mode, (there should be code in the reset handler to ensure that the distributor within the GIC dispatches interrupts only to CPU0). 
+				During the lock-step operation, the TCMs that are associated with the redundant processor become available to the lock-step processor. 
+				The size of ATCM and BTCM become 128 KB each with BTCM supporting interleaved accesses from processor and AXI slave interface.
+			</help>
+		</item>
 	</configuration>
 	<!-- SCRIPT ::= -->
 	<script>
