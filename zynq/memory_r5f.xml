@@ -8,6 +8,12 @@
         https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/System-level-Control-Registers TODO: read this
         https://docs.xilinx.com/r/en-US/ug1085-zynq-ultrascale-trm/Lock-step-Operation
 	-->
+
+    <!-- Note: 
+            Otawa uses 10 cycles for memories whose latency value has not been defined. 
+            Since the TCMi is a low-latency memory, this will cause the WCET calculation to be overestimated. 
+            Therefore, let us use 5 cycles. The TRM states that they are low-latency memory, but it does not precise the exact value.
+    -->
     <banks> <!-- all doc: 3-->
         <bank>
             <name>OCM0</name> <!-- Bank 0 of On chip mem -->
@@ -105,6 +111,9 @@
             <type>SPM</type>
             <on_chip>true</on_chip>
             <writable>true</writable>
+            <write_latency>5</write_latency>
+            <read_latency>5</read_latency>
+            <latency>5</latency>
         </bank>
 
 
@@ -153,6 +162,9 @@
             <type>SPM</type>
             <on_chip>true</on_chip>
             <writable>true</writable>
+            <write_latency>5</write_latency>
+            <read_latency>5</read_latency>
+            <latency>5</latency>
         </bank>
 
     </banks>
