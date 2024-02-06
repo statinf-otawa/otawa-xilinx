@@ -32,7 +32,7 @@
 #define FUs_NUM_STAGE 2
 #undef print
 namespace otawa { namespace xilinxR5 {
-	extern p::id<bool> LOG;
+	extern p::id<bool> WRITE_LOG;
 	using namespace elm::io;
 	
 	class ExeGraph: public etime::EdgeTimeGraph {
@@ -355,6 +355,7 @@ namespace otawa { namespace xilinxR5 {
 	protected:
 		virtual void configure(const PropList& props) {
 			etime::EdgeTimeBuilder::configure(props);
+			write_log = WRITE_LOG(props);
 			_props = props;
 		}
 		void setup(WorkSpace* ws) override {
@@ -370,7 +371,7 @@ namespace otawa { namespace xilinxR5 {
 				throw ProcessorException(*this, "no instruction cache");
 			if (dcache == icache)
 				throw ProcessorException(*this, "unified L1 cache not supported");
-			if (LOG(_props)) {
+			if (write_log) {
 				sys::Path log_file_path = sys::Path(ws->process()->program()->name() + ".log");
 				bool write_header = (log_file_path.exists()) ? false : true;
 				log_stream = new FileOutput(log_file_path, true);
@@ -403,6 +404,7 @@ namespace otawa { namespace xilinxR5 {
 		const hard::Cache *dcache, *icache;
 		hard::Memory *mem;
 		FileOutput* log_stream = nullptr;
+		bool write_log = 0;
 		elm::Vector<Address>* unknown_inst_address = nullptr;
 	};
 
@@ -417,7 +419,7 @@ namespace otawa { namespace xilinxR5 {
 	/**
 	* This configuration property allows the know if the log is required.
 	*/
-	p::id<bool> LOG("otawa::xilinxR5::LOG", false);
+	p::id<bool> WRITE_LOG("otawa::xilinxR5::WRITE_LOG", 0);
 	/* plugin hook */
 	ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinxR5", OTAWA_PROC_VERSION)
 										.version(Version(1, 0, 0))

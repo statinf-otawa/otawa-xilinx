@@ -37,6 +37,7 @@
 		</bht>
 	</platform>
 
+	<!-- CONFIGURATION ::= -->
 	<configuration>
 		<item name="export_exec_graph" type="bool" default="false" label="Export the ParExeGraph">
 			<help>Export the Parametric Execution Graphes built during WCET computation.
@@ -90,7 +91,7 @@
 		<step require="otawa::dcache::EVENTS_FEATURE"/>
 
 		<step processor="otawa::xilinxR5::BBTimerXilinxR5"> 
-			<config name="otawa::xilinxR5::LOG" value="{$log}"/>
+			<config name="otawa::xilinxR5::WRITE_LOG" value="{$log}"/>
 		</step>
 		<step require="otawa::ipet::WCET_FEATURE"/>	
 	</script>
