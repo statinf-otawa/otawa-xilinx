@@ -25,6 +25,7 @@
 #include <elm/sys/Path.h>
 #include <otawa/loader/arm.h>
 #include <elm/io/FileOutput.h>
+#include <elm/data/Vector.h>
 #include "timing.h"
 #include "xilinxR5_operand.h"
 #define OCM_ACCESS_LATENCY 23 // https://support.xilinx.com/s/question/0D52E00006hpZz4SAE/ocm-latency-vs-l2-cache-latency?language=en_US
@@ -37,9 +38,10 @@ namespace otawa { namespace xilinxR5 {
 	class ExeGraph: public etime::EdgeTimeGraph {
 	public:
 		
-		// static bool log_stream_is_open;
 		ExeGraph(WorkSpace *ws, ParExeProc *proc, Vector<Resource *> *hw_resources, 
-					ParExeSequence *seq, const PropList &props, FileOutput* out) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0), _out(out) {
+					ParExeSequence *seq, const PropList &props, FileOutput* out, elm::Vector<Address>* unknown_inst_address) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), 
+																																exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0), _out(out), 
+																																_unknown_inst_address(unknown_inst_address) {
 			
 			// Try to find arm loader with arm information
 			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
@@ -219,7 +221,12 @@ namespace otawa { namespace xilinxR5 {
 			for (InstIterator inst(this); inst(); inst++) {
 				if (!get_inst_cycle_timing_info(inst->inst())->unknown)
 					continue;
-				*_out << inst->inst()->address() << "; " << inst->inst() << endl;
+				
+				auto addr = inst->inst()->address();
+				if (_unknown_inst_address->contains(addr))
+					continue;
+				_unknown_inst_address->add(addr);
+				*_out << addr << "; " << inst->inst() << endl;
 			}
 		}
 
@@ -284,6 +291,7 @@ namespace otawa { namespace xilinxR5 {
 		ParExeStage* stage[CNT];
 		ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
 		FileOutput* _out = nullptr;
+		elm::Vector<Address>* _unknown_inst_address = nullptr;
 		/*
 			Find the Mem stage of an instruction.
 			    inst: Concerned instruction.
@@ -374,11 +382,13 @@ namespace otawa { namespace xilinxR5 {
 								<< "########################################################" << endl;
 				else
 					*log_stream << endl; // sep
+				
+				unknown_inst_address = new elm::Vector<Address>();
 			}
 		}
 
 		etime::EdgeTimeGraph* make(ParExeSequence* seq) override {
-			ExeGraph* graph = new ExeGraph(workspace(), _microprocessor, ressources(), seq, _props, log_stream);
+			ExeGraph* graph = new ExeGraph(workspace(), _microprocessor, ressources(), seq, _props, log_stream, unknown_inst_address);
 			graph->build();
 			return graph;
 		}
@@ -393,6 +403,7 @@ namespace otawa { namespace xilinxR5 {
 		const hard::Cache *dcache, *icache;
 		hard::Memory *mem;
 		FileOutput* log_stream = nullptr;
+		elm::Vector<Address>* unknown_inst_address = nullptr;
 	};
 
 	
