@@ -38,14 +38,14 @@
 	</platform>
 
 	<configuration>
-		<item name="export_exec_graph" type="bool" default="true" label="Export the ParExeGraph">
+		<item name="export_exec_graph" type="bool" default="false" label="Export the ParExeGraph">
 			<help>Export the Parametric Execution Graphes built during WCET computation.
 				User will have to create a directory named ParExeGraph in the directory he calls owcet from.
 				The graph will be saved in the directory.
 			</help>
 		</item>
 
-		<item name="log" type="bool" default="true" label="Write log file">
+		<item name="log" type="bool" default="false" label="Write log file">
 			<help>By setting this to true, all warning messages occured during the execution of the feature xilinxR5::BBTimerXilinxR5
 				will be written into "program.log" file. "program" is the input binary file of owcet. 
 			</help>
