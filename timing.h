@@ -53,4 +53,4 @@ xilinx_r5_time_t time_tbb_tbh       = {9, 9, 9, UNDEFINED, NONE                }
 xilinx_r5_time_t time_mult	 		= {2, 3, 1, EARLY_REG, NONE                };
 xilinx_r5_time_t time_mult_long		= {2, 3, 1, EARLY_REG, NONE                };
 xilinx_r5_time_t time_unknown 		= {15, 15, 15, VERY_EARLY_REG, NONE, true  };
-#include "xilinxR5_time.h"
+#include "arm_v7AR_time.h"

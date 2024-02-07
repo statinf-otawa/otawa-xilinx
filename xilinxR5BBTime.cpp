@@ -27,11 +27,11 @@
 #include <elm/io/FileOutput.h>
 #include <elm/data/Vector.h>
 #include "timing.h"
-#include "xilinxR5_operand.h"
-#define OCM_ACCESS_LATENCY 23 // https://support.xilinx.com/s/question/0D52E00006hpZz4SAE/ocm-latency-vs-l2-cache-latency?language=en_US
+#include "arm_v7AR_operand.h"
+#define OCM_ACCESS_LATENCY 10 // TODO: this is to be updated
 #define FUs_NUM_STAGE 2
 #undef print
-namespace otawa { namespace xilinxR5 {
+namespace otawa { namespace xilinx {
 	extern p::id<bool> WRITE_LOG;
 	using namespace elm::io;
 	
@@ -205,7 +205,7 @@ namespace otawa { namespace xilinxR5 {
 				// get cycle_time_info of inst
 				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
 				if (inst_cycle_timing->flags & (STORE|LOAD)) {
-					ot::time latency = get_cost_of_mem_access(inst->inst());
+					ot::time latency = get_cost_of_mem_access(inst->inst()); // TOOD: rewrite get_cost_of_mem_access
 					ParExeNode* first_fu_node = inst->firstFUNode();
 					first_fu_node->setLatency(first_fu_node->latency() + latency);
 				}
@@ -336,7 +336,7 @@ namespace otawa { namespace xilinxR5 {
 			return inst_n_reg;
 		}
 
-		ot::time get_cost_of_mem_access(Inst* inst) {
+		ot::time get_cost_of_mem_access(Inst* inst) { // TODO: not good enough
 			xilinx_r5_time_t* inst_ct = get_inst_cycle_timing_info(inst);
 			bool write = inst_ct->flags & STORE;
 			const hard::Bank* bank = mem->get(inst->address());
@@ -410,7 +410,7 @@ namespace otawa { namespace xilinxR5 {
 
 	
 
-	p::declare BBTimerXilinxR5::reg = p::init("otawa::xilinxR5::BBTimerXilinxR5", Version(1, 0, 0))
+	p::declare BBTimerXilinxR5::reg = p::init("otawa::xilinx::BBTimerXilinxR5", Version(1, 0, 0))
 										.extend<etime::EdgeTimeBuilder>()
 										.require(otawa::hard::CACHE_CONFIGURATION_FEATURE)
 										.maker<BBTimerXilinxR5>();
@@ -419,13 +419,8 @@ namespace otawa { namespace xilinxR5 {
 	/**
 	* This configuration property allows the know if the log is required.
 	*/
-	p::id<bool> WRITE_LOG("otawa::xilinxR5::WRITE_LOG", 0);
-	/* plugin hook */
-	ProcessorPlugin plugin = sys::Plugin::make("otawa::xilinxR5", OTAWA_PROC_VERSION)
-										.version(Version(1, 0, 0))
-										.hook(OTAWA_PROC_NAME);
-	ELM_PLUGIN(plugin, OTAWA_PROC_HOOK);
+	p::id<bool> WRITE_LOG("otawa::xilinx::WRITE_LOG", 0);
 
-} // namespace xilinxR5
+} // namespace xilinx
 } // namespace otawa
 

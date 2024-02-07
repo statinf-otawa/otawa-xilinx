@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bht class="otawa::hard::BHT">
+    <!-- DOCUMENTATION
+		https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwiS6uKPoMaCAxXmRaQEHQjOAUkQFnoECA0QAQ&url=https%3A%2F%2Fdocumentation-service.arm.com%2Fstatic%2F5f042788cafe527e86f5cc83%3Ftoken%3D&usg=AOvVaw1t9Z6H0AlFH7k6BFcIRvB5&opi=89978449
+    -->
+    <bht> <!-- doc 1, 436 -->
+        <correct_taken_penalty>1</correct_taken_penalty>
+        <correct_not_taken_penalty>0</correct_not_taken_penalty>
+        <incorrect_taken_penalty>9</incorrect_taken_penalty>
+        <incorrect_not_taken_penalty>9</incorrect_not_taken_penalty>
+    </bht>
+  </bht>  

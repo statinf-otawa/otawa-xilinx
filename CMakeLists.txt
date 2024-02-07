@@ -1,12 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # configuration
-set(SCRIPT	"xilinxR5")
-set(FILES	"zynq/memory_r5f.xml" "zynq/pipeline_r5f.xml" "zynq/cache_r5f.xml")
+set(SCRIPT	"xilinx")
+set(FILES	"Xilinx/memory_r5f.xml" "Xilinx/pipeline_r5f.xml" "Xilinx/cache_r5f.xml" "Xilinx/bht_r5f.xml")
 set(SOURCES
+	hook.cpp
 	xilinxR5BBTime.cpp
-    xilinxR5_time.h
-	xilinxR5_operand.h
+    arm_v7AR_time.h
+	arm_v7AR_operand.h
 	timing.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
@@ -43,16 +44,16 @@ execute_process(COMMAND "${OTAWA_CONFIG}" --scriptdir  OUTPUT_VARIABLE SCRIPTDIR
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 add_custom_command(
-	OUTPUT "xilinxR5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
+	OUTPUT "arm_v7AR_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o xilinxR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unknown);" -e otawa_time.nmp -p
+	ARGS ${IRG} -o arm_v7AR_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unknown);" -e otawa_time.nmp -p
 	VERBATIM
 )
 
 add_custom_command(
-	OUTPUT "xilinxR5_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
+	OUTPUT "arm_v7AR_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o xilinxR5_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
+	ARGS ${IRG} -o arm_v7AR_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
 	VERBATIM
 )
 
@@ -70,5 +71,5 @@ install(TARGETS ${SCRIPT} LIBRARY DESTINATION "${PLUGDIR}/otawa")
 install(FILES "${SCRIPT}.eld" DESTINATION "${PLUGDIR}/otawa")
 install(FILES "${SCRIPT}.osx" DESTINATION "${SCRIPTDIR}")
 foreach(FILE ${FILES})
-	install(FILES ${CMAKE_SOURCE_DIR}/${FILE} DESTINATION "${SCRIPTDIR}/zynq")
+	install(FILES ${CMAKE_SOURCE_DIR}/${FILE} DESTINATION "${SCRIPTDIR}/Xilinx")
 endforeach()

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF8"?>
+<otawa-script
+	xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	
+	<!-- 	DOCUMENTATION
+		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview
+		https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwiS6uKPoMaCAxXmRaQEHQjOAUkQFnoECA0QAQ&url=https%3A%2F%2Fdocumentation-service.arm.com%2Fstatic%2F5f042788cafe527e86f5cc83%3Ftoken%3D&usg=AOvVaw1t9Z6H0AlFH7k6BFcIRvB5&opi=89978449
+		https://www.xilinx.com/content/dam/xilinx/imgs/products/zynq/zynq-ev-block.PNG
+		https://www.mouser.fr/datasheet/2/903/ug1182_zcu102_eval_bd-1596125.pdf
+		https://docs.xilinx.com/v/u/en-US/ds190-Zynq-7000-Overview
+	-->
+	
+	<!-- DESCRIPTION ::= -->
+		<name>Xilinx</name>
+		<info>
+			<h1>Xilinx Zynq 7000 MPSoC and Xilinx UltraScale +</h1>
+			<p>This script supports the WCET calculation for the xilinx UltraScale+ MPSoC RPU 
+				and the xilinx Zynq 7000 SoC APU, as described below.</p>
+		</info>
+		<path to="Xilinx"/>
+
+		<!-- CONFIGURATION ::= -->
+		<configuration>
+			<item name="EPG" type="bool" default="false" label="Export the ParExeGraph">
+				<help>Export the Parametric Execution Graphes built during WCET computation. User will have to create a directory named ParExeGraph in the directory he calls owcet from. The graph will be saved in the directory. Please note that generating the graphs can take an enormous amount of time, even longer than calculating the WCET.
+				</help>
+			</item>
+	
+			<item name="LOG" type="bool" default="false" label="Write log file">
+				<help>By setting this to true, all warning messages occured during the execution of the feature xilinx::BBTimerXilinxxx will be written into "program.log" file. "program" is the input binary file of owcet. 
+				</help>
+			</item>
+	
+			<item name="LAV" type="bool" default="false" label="Use Local Adress View">
+				<help>By setting this to true, The memory space desciption will use Core Local View to define the address of the memomry banks. If not set, the global address view will be used.
+				</help>
+			</item>
+
+			<item name="ARCH" type="enum" label="Processor architecture (0 or 1 or 2).">
+				<help>Select the Processor architecture type.
+					0: arm cortex R5F (arm v7-R) or 
+					1: arm cortex A9 (arm v7-A) or
+					2: arm cortex A53 (arm v8-A).
+					WARNING: 1 and 2 options are not supported yet.
+				</help>
+				<value label="arm cortex R5 (arm v7-R)" value="0" default="true"/>
+				<value label="arm cortex A9 (arm v7-A)" value="1"/>
+				<value label="arm cortex A53 (arm v8-A)" value="2"/>
+			</item>
+	
+			<item name="coreID" type="enum" label="Core id">
+				<help>Select the type of core ID (0 or 1).</help>
+				<value label="core 0" value="0" default="true"/>
+				<value label="core 1" value="1"/>
+			</item>
+	
+			<item name="LSM" type="bool" default="true" label="Lock-step Mode">
+				<help>Setting this to true assumes that the processors are in the lock-step-mode, (there should be code in the reset handler to ensure that the distributor within the GIC dispatches interrupts only to CPU0). During the lock-step operation, the TCMs that are associated with the redundant processor become available to the lock-step processor. The size of ATCM and BTCM become 128 KB each with BTCM supporting interleaved accesses from processor and AXI slave interface.
+				</help>
+			</item>
+		</configuration>
+		
+	<!-- IDENTIFICATION ::= -->
+		<id>
+			<abi>elf</abi>
+			<xsl:choose>
+				<xsl:when test="$ARCH=0">
+					<arch>armv7-r</arch>
+					<mach>Zynq UltraScale+ MPSoC, Arm cortex R5F</mach>
+				</xsl:when>
+				<!-- <xsl:when test="$ARCH=1">
+					<arch>armv7-a</arch>
+					<mach>Zynq-7000</mach>
+				</xsl:when>
+				<xsl:when test="$ARCH=2">
+					<arch>armv8-a</arch>
+					<mach>Zynq UltraScale+ MPSoC, Arm cortex A53</mach>
+				</xsl:when> -->
+			</xsl:choose>
+		</id>
+	
+	<!-- PLATFORM ::= -->
+	<platform>
+		<xsl:choose>
+			<xsl:when test="$ARCH=0">
+				<xi:include href="Xilinx/pipeline_r5f.xml"/>
+				<xi:include href="Xilinx/cache_r5f.xml"/>
+				<xi:include href="Xilinx/memory_r5f.xml"/>
+				<xi:include href="Xilinx/bht_r5f.xml"/>
+			</xsl:when>
+			<!-- <xsl:when test="$ARCH=1">
+				<xi:include href="Xilinx/pipeline_a9.xml"/>
+				<xi:include href="Xilinx/cache_a9.xml"/>
+				<xi:include href="Xilinx/memory_a9.xml"/>
+				<xi:include href="Xilinx/bht_a9.xml"/>
+			</xsl:when>
+			<xsl:when test="$ARCH=2">
+				<xi:include href="Xilinx/pipeline_a53.xml"/>
+				<xi:include href="Xilinx/cache_a53.xml"/>
+				<xi:include href="Xilinx/memory_r5f.xml"/>
+				<xi:include href="Xilinx/bht_a53.xml"/>
+			</xsl:when> -->
+		</xsl:choose>
+	</platform>
+
+	<!-- SCRIPT ::= -->
+	<script>
+		
+		<xsl:choose>
+			<xsl:when test="$ARCH=0 or $ARCH=1 or $ARCH=2">
+				<xsl:if test="$EPG!=0">
+					<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="ParExeGraph"/>
+				</xsl:if>
+				
+				<config name="otawa::ipet::EXPLICIT" value="true"/>
+				<step require="otawa::VIRTUALIZED_CFG_FEATURE"/> 
+
+				<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
+				<step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
+				<step require="otawa::hard::BHT_FEATURE"/>
+				<step require="otawa::dcache::CLP_ACCESS_FEATURE"/>
+				<step require="otawa::dcache::MAY_FEATURE"/>
+				<step require="otawa::dcache::PERS_FEATURE"/>
+				<step require="otawa::dcache::MUST_FEATURE"/>
+				<step require="otawa::dcache::MULTI_PERS_FEATURE"/>
+				<step require="otawa::dcache::CATEGORY_FEATURE"/>
+				<step require="otawa::dcache::EVENTS_FEATURE"/>
+
+				<step processor="otawa::xilinx::BBTimerXilinxR5"> 
+					<config name="otawa::xilinx::WRITE_LOG" value="{$LOG}"/>
+				</step>
+				<step require="otawa::ipet::WCET_FEATURE"/>	
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:message terminate="no">ARCH not supported or Bad value of ARCH parameter.</xsl:message>
+			</xsl:otherwise>
+		</xsl:choose>
+	</script>
+</otawa-script>

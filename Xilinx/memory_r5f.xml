@@ -23,9 +23,6 @@
                                 But it should be DRAM because SRAM is usually used for cache mem -->
             <cached>false</cached>
             <on_chip>true</on_chip>
-            <write_latency>23</write_latency>
-            <read_latency>23</read_latency>
-            <latency>23</latency>
             <writable>true</writable>
         </bank>
         <bank>
@@ -35,9 +32,6 @@
             <type>DRAM</type> <!-- Same as bank 0 -->
             <cached>false</cached>
             <on_chip>true</on_chip>
-            <write_latency>23</write_latency>
-            <read_latency>23</read_latency>
-            <latency>23</latency>
             <writable>true</writable>
         </bank>
         <bank>
@@ -47,9 +41,6 @@
             <type>DRAM</type> <!-- Same as bank 0 -->
             <cached>false</cached>
             <on_chip>true</on_chip>
-            <write_latency>23</write_latency>
-            <read_latency>23</read_latency>
-            <latency>23</latency>
             <writable>true</writable>
         </bank>
         <bank>
@@ -59,35 +50,32 @@
             <type>DRAM</type> <!-- Same as bank 0 -->
             <cached>false</cached>
             <on_chip>true</on_chip>
-            <write_latency>23</write_latency>
-            <read_latency>23</read_latency>
-            <latency>23</latency>
             <writable>true</writable>
         </bank>
 
         <bank>
             <name>R5_i ATCM</name> <!-- R5_0/1 ATCM-->
             <xsl:choose>
-                <xsl:when test="$core=0">
+                <xsl:when test="$coreID=0">
                     <xsl:choose>
-                        <xsl:when test="$lock_step_mode=1">
+                        <xsl:when test="$LSM=1">
                             <xsl:choose>
-                                <xsl:when test="$local_address_view=1">
+                                <xsl:when test="$LAV=1">
                                     <address><offset>0x00000000</offset></address>
                                 </xsl:when>
-                                <xsl:when test="$local_address_view=0">
+                                <xsl:when test="$LAV=0">
                                     <address><offset>0xFFE00000</offset></address>
                                 </xsl:when>
                             </xsl:choose>
                             <size>0x100000</size> <!-- 128 Kbytes -->
                         </xsl:when>
                     
-                        <xsl:when test="$lock_step_mode=0">
+                        <xsl:when test="$LSM=0">
                             <xsl:choose>
-                                <xsl:when test="$local_address_view=1">
+                                <xsl:when test="$LAV=1">
                                     <address><offset>0x00000000</offset></address>
                                 </xsl:when>
-                                <xsl:when test="$local_address_view=0">
+                                <xsl:when test="$LAV=0">
                                     <address><offset>0xFFE00000</offset></address>
                                 </xsl:when>
                             </xsl:choose>
@@ -96,12 +84,12 @@
                     </xsl:choose>
                 </xsl:when>
 
-                <xsl:when test="$core=1">
+                <xsl:when test="$coreID=1">
                     <xsl:choose>
-                        <xsl:when test="$local_address_view=1">
+                        <xsl:when test="$LAV=1">
                             <address><offset>0x00000000</offset></address>
                         </xsl:when>
-                        <xsl:when test="$local_address_view=0">
+                        <xsl:when test="$LAV=0">
                             <address><offset>0xFFE90000</offset></address>
                         </xsl:when>
                     </xsl:choose>
@@ -120,25 +108,25 @@
         <bank>
             <name>R5_i BTCM</name> <!-- R5_0/1 BTCM-->
             <xsl:choose>
-                <xsl:when test="$core=0">
+                <xsl:when test="$coreID=0">
                     <xsl:choose>
-                        <xsl:when test="$lock_step_mode=1">
+                        <xsl:when test="$LSM=1">
                             <xsl:choose>
-                                <xsl:when test="$local_address_view=1">
+                                <xsl:when test="$LAV=1">
                                     <address><offset>0x00020000</offset></address>
                                 </xsl:when>
-                                <xsl:when test="$local_address_view=0">
+                                <xsl:when test="$LAV=0">
                                     <address><offset>0xFFE20000</offset></address>
                                 </xsl:when>
                             </xsl:choose>
                             <size>0x100000</size> <!-- 128 Kbytes -->
                         </xsl:when>
-                        <xsl:when test="$lock_step_mode=0">
+                        <xsl:when test="$LSM=0">
                             <xsl:choose>
-                                <xsl:when test="$local_address_view=1">
+                                <xsl:when test="$LAV=1">
                                     <address><offset>0x00020000</offset></address>
                                 </xsl:when>
-                                <xsl:when test="$local_address_view=0">
+                                <xsl:when test="$LAV=0">
                                     <address><offset>0xFFE20000</offset></address>
                                 </xsl:when>
                             </xsl:choose>
@@ -147,13 +135,13 @@
                     </xsl:choose>
                 </xsl:when>
 
-                <xsl:when test="$core=1">
+                <xsl:when test="$coreID=1">
                     <xsl:choose>
-                        <xsl:when test="$local_address_view=1">
-                            <address><offset>0x00000000</offset></address>
+                        <xsl:when test="$LAV=1">
+                            <address><offset>0x00020000</offset></address>
                         </xsl:when>
-                        <xsl:when test="$local_address_view=0">
-                            <address><offset>0xFFE90000</offset></address>
+                        <xsl:when test="$LAV=0">
+                            <address><offset>0xFFEB0000</offset></address>
                         </xsl:when>
                     </xsl:choose>
                     <size>0x10000</size> <!-- 64 Kbytes -->

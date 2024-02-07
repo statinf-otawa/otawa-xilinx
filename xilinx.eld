@@ -1,4 +1,4 @@
 [elm-plugin]
-name=xilinxR5
+name=xilinx
 description=cortexr5 WCET Computation
 deps=otawa/etime;otawa/dcache
