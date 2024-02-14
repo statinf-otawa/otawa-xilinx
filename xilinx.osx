@@ -114,10 +114,12 @@
 				</xsl:if>
 				
 				<config name="otawa::ipet::EXPLICIT" value="true"/>
-				<step require="otawa::VIRTUALIZED_CFG_FEATURE"/> 
+				<step processor="otawa::Virtualizer"/>
 
 				<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
-				<step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
+			
+                <step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
+                <!-- TODO: rewrite prefetch feature-->
 				<step require="otawa::hard::BHT_FEATURE"/>
 				<step require="otawa::dcache::CLP_ACCESS_FEATURE"/>
 				<step require="otawa::dcache::MAY_FEATURE"/>

@@ -24,6 +24,9 @@
             <cached>false</cached>
             <on_chip>true</on_chip>
             <writable>true</writable>
+            <write_latency>30</write_latency>
+            <read_latency>30</read_latency>
+            <latency>30</latency>
         </bank>
         <bank>
             <name>OCM1</name> <!-- Bank 1 of On chip mem -->
@@ -33,6 +36,9 @@
             <cached>false</cached>
             <on_chip>true</on_chip>
             <writable>true</writable>
+            <write_latency>30</write_latency>
+            <read_latency>30</read_latency>
+            <latency>30</latency>
         </bank>
         <bank>
             <name>OCM2</name> <!-- Bank 2 of On chip mem -->
@@ -42,6 +48,9 @@
             <cached>false</cached>
             <on_chip>true</on_chip>
             <writable>true</writable>
+            <write_latency>30</write_latency>
+            <read_latency>30</read_latency>
+            <latency>30</latency>
         </bank>
         <bank>
             <name>OCM3</name> <!-- Bank 3 of On chip mem -->
@@ -51,6 +60,9 @@
             <cached>false</cached>
             <on_chip>true</on_chip>
             <writable>true</writable>
+            <write_latency>30</write_latency>
+            <read_latency>30</read_latency>
+            <latency>30</latency>
         </bank>
 
         <bank>
@@ -99,9 +111,7 @@
             <type>SPM</type>
             <on_chip>true</on_chip>
             <writable>true</writable>
-            <write_latency>5</write_latency>
-            <read_latency>5</read_latency>
-            <latency>5</latency>
+            <cachable>true</cachable>
         </bank>
 
 
@@ -150,9 +160,7 @@
             <type>SPM</type>
             <on_chip>true</on_chip>
             <writable>true</writable>
-            <write_latency>5</write_latency>
-            <read_latency>5</read_latency>
-            <latency>5</latency>
+            <cachable>true</cachable>
         </bank>
 
     </banks>

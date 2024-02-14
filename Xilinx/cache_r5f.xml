@@ -10,13 +10,11 @@
 		<block_bits>5</block_bits>
 		<way_bits>2</way_bits>
 		<row_bits>8</row_bits>
-		<replace>RANDOM</replace>
 	</dcache>
 	
 	<icache> <!-- 32 KB Level 1 4-way set-associative instruction cache -->
 		<block_bits>5</block_bits> <!--  8-word cache line length -->
 		<way_bits>2</way_bits> <!-- 4 ways set-associative -->
 		<row_bits>8</row_bits> <!-- n set-->
-		<replace>RANDOM</replace> <!-- Pseudo-random cache replacement policy - doc : 2,31 -->
 	</icache>
 </cache-config>
