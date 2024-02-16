@@ -6,10 +6,10 @@ set(FILES	"Xilinx/memory_r5f.xml" "Xilinx/pipeline_r5f.xml" "Xilinx/cache_r5f.xm
 set(SOURCES
 	hook.cpp
 	xilinxR5BBTime.cpp
-    xilinxA9BBTime.cpp
+    # xilinxA9BBTime.cpp
     preFetchAnalysis.cpp
     armCortexR5_time.h
-	arm_v7AR_operand.h
+	armCortexR5_operand.h
 	timing.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
@@ -53,9 +53,9 @@ add_custom_command(
 )
 
 add_custom_command(
-	OUTPUT "arm_v7AR_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
+	OUTPUT "armCortexR5_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o arm_v7AR_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
+	ARGS ${IRG} -o armCortexR5_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
 	VERBATIM
 )
 

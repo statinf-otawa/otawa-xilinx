@@ -27,7 +27,7 @@
 #include <elm/io/FileOutput.h>
 #include <elm/data/Vector.h>
 #include "timing.h"
-#include "arm_v7AR_operand.h"
+#include "armCortexR5_operand.h"
 #define OCM_ACCESS_LATENCY 50
 #define FUs_NUM_STAGE 2
 #undef print
