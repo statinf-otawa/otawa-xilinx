@@ -117,10 +117,10 @@
 				<step processor="otawa::Virtualizer"/>
 
 				<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
-			
-                <step require="otawa::ICACHE_ONLY_CONSTRAINT2_FEATURE"/>
-                <!-- TODO: rewrite prefetch feature-->
+                <step processor="otawa::xilinx::PrefetchEventBuilder"/>
+
 				<step require="otawa::hard::BHT_FEATURE"/>
+
 				<step require="otawa::dcache::CLP_ACCESS_FEATURE"/>
 				<step require="otawa::dcache::MAY_FEATURE"/>
 				<step require="otawa::dcache::PERS_FEATURE"/>
@@ -129,7 +129,7 @@
 				<step require="otawa::dcache::CATEGORY_FEATURE"/>
 				<step require="otawa::dcache::EVENTS_FEATURE"/>
 
-				<step processor="otawa::xilinx::BBTimerXilinxR5"> 
+                <step processor="otawa::xilinx::BBTimerXilinxR5"> 
 					<config name="otawa::xilinx::WRITE_LOG" value="{$LOG}"/>
 				</step>
 				<step require="otawa::ipet::WCET_FEATURE"/>	
