@@ -21,6 +21,7 @@
 			<name>Fetch</name>
 			<width>2</width>
 			<type>FETCH</type>
+            <latency>3</latency>
 		</stage>
 		<stage id="DE">
 			<name>Decode</name>
@@ -44,41 +45,44 @@
 				<fu id="EXEC_F"> <!-- FPU / NEON  -->
 					<name>EXEC_F</name>
 					<width>1</width>
-					<latency>32</latency> <!-- doc: 6, 38 and 5, 18 -->
+					<latency>2</latency> <!-- doc: 6, 38 and 5, 18 -->
 					<pipelined>true</pipelined>
 				</fu>
 
-				<fu id="EXEC_MUL"> <!-- MUL / ALU-->
-					<name>EXEC_MUL</name>
-					<width>1</width>
-					<latency>5</latency> <!-- doc: 7, 203 -->
+				<fu id="EXEC_ALU_MUL"> <!-- MUL / ALU-->
+					<name>EXEC_ALU_MUL</name>
+					<width>2</width>
+					<latency>2</latency> <!-- doc: 7, 203 -->
 					<pipelined>true</pipelined>
 				</fu>
-				<fu id="EXEC_ALU"> <!-- ALU -->
+				<!-- <fu id="EXEC_ALU"> 198
 					<name>EXEC_ALU</name>
 					<width>2</width>
-					<latency>3</latency> <!-- doc: 7, 198 -->
+					<latency>2</latency> 
 					<pipelined>true</pipelined>
-				</fu>
+				</fu> -->
 				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
 					<name>EXEC_LDST</name>
 					<width>1</width>
-					<latency>9</latency> <!-- doc: 7, 202-->
+					<latency>2</latency> <!-- doc: 7, 202-->
 					<pipelined>true</pipelined>
+                    <mem>true</mem>                    
 				</fu>
 			</fus>
 			<dispatch>
 				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
 				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
-				<inst> <type>IS_MUL</type> <fu ref="EXEC_MUL"/> </inst>
+				<!-- <inst> <type>IS_MUL</type> <fu ref="EXEC_ALU_MUL"/> </inst> -->
 				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_F"/> </inst>
-				<inst> <type></type> <fu ref="EXEC_ALU"/> </inst>
+				<!-- <inst> <type></type> <fu ref="EXEC_ALU"/> </inst> -->
+                <inst> <type></type> <fu ref="EXEC_ALU_MUL"/> </inst>
 			</dispatch>
 		</stage>
 		<stage id="WB"> <!-- Write back stage-->
 			<name>WB</name>
-			<width>4</width>
+			<width>2</width>
 			<type>COMMIT</type>
+            <mem>true</mem>
 		</stage>
 	</stages>
 </processor>

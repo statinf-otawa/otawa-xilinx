@@ -10,7 +10,6 @@
 		<block_bits>5</block_bits> <!--  32 bytes/line -->
 		<way_bits>2</way_bits> <!-- 4 ways set-associative -->
 		<row_bits>8</row_bits> <!-- n set-->
-		<replace>RANDOM</replace> <!-- Instruction cache replacement policy is either pseudo round-robin or pseudo random.-->
 		<next id="L2"> <!-- 512 KB 8-way set-associative Level 2 cache -->
 			<block_bits>5</block_bits> <!--  32 bytes/line -->
 			<row_bits>11</row_bits>
@@ -22,7 +21,6 @@
 		<block_bits>5</block_bits> <!--  32 bytes/line -->
 		<way_bits>2</way_bits> <!-- 4 ways -->
 		<row_bits>8</row_bits> <!-- n set-->
-		<replace>RANDOM</replace> <!-- Instruction cache replacement policy is either pseudo round-robin or pseudo random.-->
 		<next ref="L2"/>
 	</icache>
 </cache-config>
