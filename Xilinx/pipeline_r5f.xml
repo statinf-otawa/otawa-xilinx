@@ -7,6 +7,7 @@
 	<!-- DOCUMENTATION
 		https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwiS6uKPoMaCAxXmRaQEHQjOAUkQFnoECA0QAQ&url=https%3A%2F%2Fdocumentation-service.arm.com%2Fstatic%2F5f042788cafe527e86f5cc83%3Ftoken%3D&usg=AOvVaw1t9Z6H0AlFH7k6BFcIRvB5&opi=89978449
 		https://docs.xilinx.com/v/u/en-US/ds891-zynq-ultrascale-plus-overview
+        https://www.researchgate.net/figure/Disabled-structures-in-the-Cortex-R5-pipeline-when-enabling-the-high-resilience-mode_fig1_320436627
 	-->
 	<arch>armv7-r</arch>
 	<model>Zynq UltraScale+™ MPSoC</model>
@@ -16,6 +17,7 @@
 			<name>PreFetch</name>
 			<type>FETCH</type>
 			<width>2</width>
+            <latency>2</latency> <!-- 2 fetch stages - doc 3 -->
 		</stage>
 		<stage id="DE">
 			<name>Decode</name>

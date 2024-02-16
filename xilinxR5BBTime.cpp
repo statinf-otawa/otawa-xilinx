@@ -28,7 +28,7 @@
 #include <elm/data/Vector.h>
 #include "timing.h"
 #include "arm_v7AR_operand.h"
-#define OCM_ACCESS_LATENCY 10 // TODO: this is to be updated
+#define OCM_ACCESS_LATENCY 50
 #define FUs_NUM_STAGE 2
 #undef print
 namespace otawa { namespace xilinx {
@@ -63,9 +63,9 @@ namespace otawa { namespace xilinx {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
 						if (!prev_inst->inst()->target()) {
-							delay = get_inst_cycle_timing_info(inst->inst())->br_penalty;
+							delay = get_inst_cycle_timing_info(prev_inst->inst())->br_penalty;
 							if (delay >= 2) 
-								new ParExeEdge(prev_inst->firstFUNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
+								new ParExeEdge(prev_inst->lastFUNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
 						}
 					}
 				}
@@ -79,8 +79,8 @@ namespace otawa { namespace xilinx {
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
 				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
-				inst->firstFUNode()->setLatency(inst_cycle_timing->ex_cost - (inst_cycle_timing->ex_cost / 2));
-				inst->lastFUNode()->setLatency(inst_cycle_timing->ex_cost / 2);
+				inst->firstFUNode()->setLatency(inst_cycle_timing->ex_cost - 1);
+				// inst->lastFUNode()->setLatency(inst_cycle_timing->ex_cost / 2);
 			}
 		}
 

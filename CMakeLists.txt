@@ -7,7 +7,8 @@ set(SOURCES
 	hook.cpp
 	xilinxR5BBTime.cpp
     xilinxA9BBTime.cpp
-    arm_v7AR_time.h
+    preFetchAnalysis.cpp
+    armCortexR5_time.h
 	arm_v7AR_operand.h
 	timing.h
 )
@@ -45,9 +46,9 @@ execute_process(COMMAND "${OTAWA_CONFIG}" --scriptdir  OUTPUT_VARIABLE SCRIPTDIR
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 add_custom_command(
-	OUTPUT "arm_v7AR_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
+	OUTPUT "armCortexR5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o arm_v7AR_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unknown);" -e otawa_time.nmp -p
+	ARGS ${IRG} -o armCortexR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unknown);" -e otawa_time.nmp -p
 	VERBATIM
 )
 
