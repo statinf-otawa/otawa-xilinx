@@ -30,7 +30,7 @@
 #include "armCortexR5_operand.h"
 #define OCM_ACCESS_LATENCY 50
 #define FUs_NUM_STAGE 2
-#undef print
+
 namespace otawa { namespace xilinx {
     using namespace elm::io;
 	extern p::id<bool> WRITE_LOG;
@@ -47,10 +47,10 @@ namespace otawa { namespace xilinx {
 	class ExeGraph: public etime::EdgeTimeGraph {
 	public:
 		
-		ExeGraph(WorkSpace *ws,
-                 ParExeProc *proc, 
-                 Vector<Resource *> *hw_resources, 
-				 ParExeSequence *seq,
+		ExeGraph(WorkSpace* ws,
+                 ParExeProc* proc, 
+                 Vector<Resource* >* hw_resources, 
+				 ParExeSequence* seq,
                  const PropList &props,
                  FileOutput* out, 
                  elm::Vector<Address>* unknown_inst_address) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), 
@@ -58,7 +58,7 @@ namespace otawa { namespace xilinx {
                                                                 _unknown_inst_address(unknown_inst_address) {
 			
 			// Try to find arm loader with arm information
-			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
+			DynIdentifier<arm::Info* > id("otawa::arm::Info::ID");
 			info = id(_ws->process());
 			if (!info)
 				throw Exception("ARM loader with otawa::arm::INFO is required !");
@@ -376,7 +376,7 @@ namespace otawa { namespace xilinx {
 		}
 		void setup(WorkSpace* ws) override {
 			etime::EdgeTimeBuilder::setup(ws);
-			const hard::CacheConfiguration *cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
+			const hard::CacheConfiguration* cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
 			if (!cache_config)
 				throw ProcessorException(*this, "no cache");
 			dcache = cache_config->dataCache();
@@ -418,7 +418,7 @@ namespace otawa { namespace xilinx {
 	private:
 		PropList _props;
 		const hard::Cache *dcache, *icache;
-		hard::Memory *mem;
+		hard::Memory* mem;
 		FileOutput* log_stream = nullptr;
 		bool write_log = 0;
 		elm::Vector<Address>* unknown_inst_address = nullptr;

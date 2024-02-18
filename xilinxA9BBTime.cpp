@@ -28,18 +28,35 @@
 #include <elm/io/FileOutput.h>
 #include <elm/data/Vector.h>
 
-#undef print
 namespace otawa { namespace xilinx {
+    using namespace elm::io;
+    extern p::id<bool> WRITE_LOG;
+
+    typedef enum {
+        FE    = 0,
+        IQ    = 1,
+        DE    = 2,
+        REGR  = 3,
+        EXE   = 4,
+        WB    = 5,
+        CNT   = 6
+    } pipeline_stage_t;
+    
     class ExeGraph: public etime::EdgeTimeGraph {
 	public:
 		
-		ExeGraph(WorkSpace *ws, ParExeProc *proc, Vector<Resource *> *hw_resources, 
-					ParExeSequence *seq, const PropList &props, FileOutput* out, elm::Vector<Address>* unknown_inst_address) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), 
-																																exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0), _out(out), 
-																																_unknown_inst_address(unknown_inst_address) {
+		ExeGraph(WorkSpace* ws,
+                 ParExeProc* proc, 
+                 Vector<Resource* >* hw_resources, 
+				 ParExeSequence* seq,
+                 const PropList& props,
+                 FileOutput* out, 
+                 elm::Vector<Address>* unknown_inst_address) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), 
+                                                                exec_f(0), exec_alu_mul(0), exec_ldst(0), _out(out), 
+                                                                _unknown_inst_address(unknown_inst_address) {
 			
 			// Try to find arm loader with arm information
-			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
+			DynIdentifier<arm::Info* > id("otawa::arm::Info::ID");
 			info = id(_ws->process());
 			if (!info)
 				throw Exception("ARM loader with otawa::arm::INFO is required !");
@@ -51,8 +68,8 @@ namespace otawa { namespace xilinx {
         private:
             otawa::arm::Info* info;
             const hard::Memory* mem;
-            // ParExeStage* stage[CNT];
-            ParExePipeline *exec_f_fu, *exec_dpu_fu, *exec_lsu_fu;
+            ParExeStage* stage[CNT];
+            ParExePipeline *exec_f, *exec_alu_mul, *exec_ldst;
             FileOutput* _out = nullptr;
             elm::Vector<Address>* _unknown_inst_address = nullptr;
     };
@@ -70,7 +87,7 @@ namespace otawa { namespace xilinx {
 		}
 		void setup(WorkSpace* ws) override {
 			etime::EdgeTimeBuilder::setup(ws);
-			const hard::CacheConfiguration *cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
+			const hard::CacheConfiguration* cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
 			if (!cache_config)
 				throw ProcessorException(*this, "no cache");
 			dcache = cache_config->dataCache();
@@ -112,7 +129,7 @@ namespace otawa { namespace xilinx {
 	private:
 		PropList _props;
 		const hard::Cache *dcache, *icache;
-		hard::Memory *mem;
+		hard::Memory* mem;
 		FileOutput* log_stream = nullptr;
 		bool write_log = 0;
 		elm::Vector<Address>* unknown_inst_address = nullptr;
@@ -127,5 +144,6 @@ namespace otawa { namespace xilinx {
 	
 
 
-}
-}
+} // namespace xilinx
+} // namespace otawa
+

@@ -6,7 +6,7 @@ set(FILES	"Xilinx/memory_r5f.xml" "Xilinx/pipeline_r5f.xml" "Xilinx/cache_r5f.xm
 set(SOURCES
 	hook.cpp
 	xilinxR5BBTime.cpp
-    # xilinxA9BBTime.cpp
+    xilinxA9BBTime.cpp
     preFetchAnalysis.cpp
     armCortexR5_time.h
 	armCortexR5_operand.h
