@@ -21,7 +21,7 @@ static void xilinx_r5_time_UNKNOWN($(proc)_inst_t *inst) {
 
 $(foreach instructions)
 static void xilinx_r5_time_$(IDENT)($(proc)_inst_t *inst) {
-$(arm7_time)
+$(cortexR5_time)
 };
 
 $(end)

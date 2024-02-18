@@ -10,7 +10,7 @@ set(SOURCES
     preFetchAnalysis.cpp
     armCortexR5_time.h
 	armCortexR5_operand.h
-	timing.h
+	R5CycleTiming.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
 set(GLISS_HOME 	"${CMAKE_SOURCE_DIR}/../gliss2")
@@ -46,9 +46,9 @@ execute_process(COMMAND "${OTAWA_CONFIG}" --scriptdir  OUTPUT_VARIABLE SCRIPTDIR
 message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 add_custom_command(
-	OUTPUT "armCortexR5_time.h" DEPENDS "otawa_time.tpl" "otawa_time.nmp" ${IRG}
+	OUTPUT "armCortexR5_time.h" DEPENDS "otawa_R5Time.tpl" "otawa_R5Time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o armCortexR5_time.h -a arm7_time -t "otawa_time.tpl" -d "SET_TIME(time_unknown);" -e otawa_time.nmp -p
+	ARGS ${IRG} -o armCortexR5_time.h -a cortexR5_time -t "otawa_R5Time.tpl" -d "SET_TIME(time_unknown);" -e otawa_R5Time.nmp -p
 	VERBATIM
 )
 

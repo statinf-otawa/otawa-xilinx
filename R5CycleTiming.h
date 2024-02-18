@@ -1,12 +1,4 @@
 typedef enum {
-	FE    = 0,
-	DE    = 1,
-	EXE   = 2,
-	WR    = 3,
-	CNT   = 4
-} pipeline_stage_t;
-
-typedef enum {
 	NORMAL_REG = 0,
 	LATE_REG = 1,
 	EARLY_REG = 2,

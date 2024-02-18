@@ -30,12 +30,12 @@ extend	CMP_imm, CMN_imm, TEQ_imm, TST_imm, MSR_imm,
 		ADD_imm, ADC_imm, AND_imm, BIC_imm, EOR_imm, MOV_imm, MVN_imm,
 		ORR_imm, RSB_imm, RSC_imm, SBC_imm, SUB_imm,
 		MSR_shr, MRS
-			arm7_time = { time("time_data_normal"); }
+			cortexR5_time = { time("time_data_normal"); }
 
 extend	ADD_shr, MOV_shr,
 		ADC_shr, ADD_shr, AND_shr, BIC_shr, EOR_shr, MVN_shr,
 		ORR_shr, RSB_shr, RSC_shr, SBC_shr, SUB_shr
-			arm7_time = {
+			cortexR5_time = {
 				if rd == 15 then
 					if shifter_operand.reg_shift then time("time_data_pc"); else time("time_data_pc"); endif;
 				else
@@ -44,23 +44,23 @@ extend	ADD_shr, MOV_shr,
 			}
 
 extend CMP_shr, CMN_shr, TEQ_shr, TST_shr
-	arm7_time = { if shifter_operand.reg_shift then time("time_data_shift"); else time("time_data_normal"); endif; }
+	cortexR5_time = { if shifter_operand.reg_shift then time("time_data_shift"); else time("time_data_normal"); endif; }
 
 
 extend B_Cond, SWI
-	arm7_time = { time("time_branch"); }
+	cortexR5_time = { time("time_branch"); }
 
 extend BX_ARM
-	arm7_time = { time("time_branch_x"); }
+	cortexR5_time = { time("time_branch_x"); }
 
 extend TBB_TBH
-	arm7_time = { time("time_tbb_tbh"); }
+	cortexR5_time = { time("time_tbb_tbh"); }
 
 extend SWP
-	arm7_time = { time("time_swp"); }
+	cortexR5_time = { time("time_swp"); }
 
 extend LDM
-	arm7_time = {
+	cortexR5_time = {
 		if reglist & (1 << 15) then
 			if "elm::ones"(reglist) > 1 then time("time_ldm_xn_pc"); else time("time_ldm_xn_pc"); endif;
 		else
@@ -69,24 +69,24 @@ extend LDM
 	}
 
 extend STM
-	arm7_time = {
+	cortexR5_time = {
 		if "elm::ones"(reglist) > 1 then time("time_stm_xn"); else time("time_stm_x1"); endif;
 	}
 
 extend LDRH_imm, LDRH_shr, LDRSB_imm, LDRSB_shr, LDRSH_imm, LDRSH_shr
-	arm7_time = { time("time_ldr_unaligned"); }
+	cortexR5_time = { time("time_ldr_unaligned"); }
 
 extend LDR_imm, LDR_shr
-	arm7_time = { if rd == 15 then time("time_ldr_pc"); else time("time_ldr_normal"); endif; }
+	cortexR5_time = { if rd == 15 then time("time_ldr_pc"); else time("time_ldr_normal"); endif; }
 
 extend STR_imm, STR_shr, STRH_imm, STRH_shr
-	arm7_time = { time("time_str_normal"); }
+	cortexR5_time = { time("time_str_normal"); }
 
 extend MUL, MLA
-	arm7_time = { time("time_mult"); }
+	cortexR5_time = { time("time_mult"); }
 
 extend SMULL, UMULL, SMLAL, UMLAL
-	arm7_time = { time("time_mult_long"); }
+	cortexR5_time = { time("time_mult_long"); }
 
 extend UADD16_thumb2, UADD8_thumb2
-	arm7_time = { time("time_parallel_data"); }
+	cortexR5_time = { time("time_parallel_data"); }
