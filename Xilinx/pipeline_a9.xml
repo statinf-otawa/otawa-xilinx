@@ -12,30 +12,32 @@
 		https://documentation-service.arm.com/static/5e8e13b4fd977155116a35eb?token=
 		https://documentation-service.arm.com/static/5e8e176afd977155116a3c45?token=
 		https://documentation-service.arm.com/static/5f0370fccafe527e86f5bfb2?token=
+        https://kolegite.com/EE_library/books_and_lectures/%D0%9C%D0%B8%D0%BA%D1%80%D0%BE%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D0%BE%D1%80%D0%BD%D0%B0%20%D1%81%D1%85%D0%B5%D0%BC%D0%BE%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0/PVSAE_Lekcii/02_Advanced-System-on-Chip-Design-Education-Kit/05_Arm_Cortex_A9_processor.pdf
 	-->
+    <!-- TODO : rewrite arch, model-->
 	<arch>armv7-a</arch>
 	<model>Zynq-7000</model>
 	<frequency>1000000000</frequency> CPU frequency: Up to 1 GHz -  Wait for Hugues's feed back 
 	<stages>
 		<stage id="FE">
 			<name>Fetch</name>
-			<width>2</width>
 			<type>FETCH</type>
             <latency>3</latency>
 		</stage>
+        <stage id="IQ">
+			<name>IQ</name>
+			<type>LAZY</type>
+		</stage>
 		<stage id="DE">
 			<name>Decode</name>
-			<width>2</width>
 			<type>LAZY</type>
 		</stage>
 		<stage id="REGR"> <!-- Register rename stage -->
 			<name>RegR</name>
-			<width>2</width>
 			<type>LAZY</type>
 		</stage>
 		<stage id="DIS"> <!-- Dispatch stage -->
 			<name>DISPATCH</name>
-			<width>2</width> 
 			<type>LAZY</type>
 		</stage>
 		<stage id="EXE">
@@ -44,26 +46,22 @@
 			<fus>
 				<fu id="EXEC_F"> <!-- FPU / NEON  -->
 					<name>EXEC_F</name>
-					<width>1</width>
 					<latency>2</latency> <!-- doc: 6, 38 and 5, 18 -->
 					<pipelined>true</pipelined>
 				</fu>
 
 				<fu id="EXEC_ALU_MUL"> <!-- MUL / ALU-->
 					<name>EXEC_ALU_MUL</name>
-					<width>2</width>
 					<latency>2</latency> <!-- doc: 7, 203 -->
 					<pipelined>true</pipelined>
 				</fu>
 				<!-- <fu id="EXEC_ALU"> 198
 					<name>EXEC_ALU</name>
-					<width>2</width>
 					<latency>2</latency> 
 					<pipelined>true</pipelined>
 				</fu> -->
 				<fu id="EXEC_LDST"> <!-- Load and store Unit -->
 					<name>EXEC_LDST</name>
-					<width>1</width>
 					<latency>2</latency> <!-- doc: 7, 202-->
 					<pipelined>true</pipelined>
                     <mem>true</mem>                    
@@ -80,7 +78,6 @@
 		</stage>
 		<stage id="WB"> <!-- Write back stage-->
 			<name>WB</name>
-			<width>2</width>
 			<type>COMMIT</type>
             <mem>true</mem>
 		</stage>
