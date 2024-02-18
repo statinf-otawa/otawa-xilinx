@@ -77,7 +77,7 @@ namespace otawa { namespace xilinx {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
 						// if (!prev_inst->inst()->target()) {
-							delay = get_inst_cycle_timing_info(prev_inst->inst())->br_penalty;
+							delay = getInstCycleTiming(prev_inst->inst())->br_penalty;
 							if (delay >= 2) 
 								new ParExeEdge(prev_inst->lastFUNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
 						// }
@@ -92,7 +92,7 @@ namespace otawa { namespace xilinx {
 			// Add latency penalty to Exec-FU nodes
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
-				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
+				xilinx_r5_time_t* inst_cycle_timing = getInstCycleTiming(inst->inst());
 				if (inst_cycle_timing->ex_cost > 1)
                     inst->firstFUNode()->setLatency(inst_cycle_timing->ex_cost - 1);
                 else
@@ -150,7 +150,7 @@ namespace otawa { namespace xilinx {
 					ParExeInst* inst = node->inst();
 
 					// get cycle_time_info of the instruction
-					xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
+					xilinx_r5_time_t* inst_cycle_timing = getInstCycleTiming(inst->inst());
 
 					// Get the dependency type of the instruction  and also calculate the ajustment value (offset)
 					// of the result latency of the instruction procuding the used data
@@ -166,7 +166,7 @@ namespace otawa { namespace xilinx {
 						// Subtract one cycle from the Result Latency of the instruction producing this register
 						offset = -1;
 						// the used data is not required until the start of wr stage
-						requiring_node = find_wr_stage(inst);
+						requiring_node = findWrSstage(inst);
 					} else if (reg_type == EARLY_REG) {
 						data_dep = "ER Dependency";
 						// Add one cycle to the Result Latency of the instruction producing this register
@@ -188,7 +188,7 @@ namespace otawa { namespace xilinx {
 					for (ParExeInst::ProducingInstIterator prod(inst); prod(); prod ++) {
 
 						// get cycle_time_info of the producer instruction
-						xilinx_r5_time_t* producer_cycle_timing = get_inst_cycle_timing_info(prod->inst());
+						xilinx_r5_time_t* producer_cycle_timing = getInstCycleTiming(prod->inst());
 						// Calculate the stall duration of the stage
 						int stall_duration = producer_cycle_timing->result_latency - producer_cycle_timing->ex_cost + offset;
 						// Find the stage node producing the data
@@ -196,7 +196,7 @@ namespace otawa { namespace xilinx {
 						if (!prod->inst()->isLoad())
 							producing_node = prod->lastFUNode();
 						else
-							producing_node = find_mem_stage(*prod);
+							producing_node = findMemStage(*prod);
 						
 						// In the case of negative value of stall duration, we need to reduce the latency value of the producer node
 						if (stall_duration < 0) {
@@ -219,9 +219,9 @@ namespace otawa { namespace xilinx {
 
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
-				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
+				xilinx_r5_time_t* inst_cycle_timing = getInstCycleTiming(inst->inst());
 				if (inst_cycle_timing->flags & (STORE|LOAD)) {
-					ot::time latency = get_cost_of_mem_access(inst->inst()); // TOOD: rewrite get_cost_of_mem_access
+					ot::time latency = getCostOfMemAccess(inst->inst()); // TOOD: rewrite getCostOfMemAccess
 					ParExeNode* first_fu_node = inst->firstFUNode();
 					first_fu_node->setLatency(first_fu_node->latency() + latency);
 				}
@@ -235,7 +235,7 @@ namespace otawa { namespace xilinx {
 			if (_out == nullptr)
 				return;
 			for (InstIterator inst(this); inst(); inst++) {
-				if (!get_inst_cycle_timing_info(inst->inst())->unknown)
+				if (!getInstCycleTiming(inst->inst())->unknown)
 					continue;
 				
 				auto addr = inst->inst()->address();
@@ -312,7 +312,7 @@ namespace otawa { namespace xilinx {
 			Find the Mem stage of an instruction.
 			    inst: Concerned instruction.
 		*/
-		ParExeNode* find_mem_stage(ParExeInst* inst) {
+		ParExeNode* findMemStage(ParExeInst* inst) {
 			for (ParExeInst::NodeIterator node(inst); node(); node++) {
 					if (node->stage() == _microprocessor->memStage())
 						return *node;
@@ -324,7 +324,7 @@ namespace otawa { namespace xilinx {
 			Find the WB stage of an instruction.
 			    inst: Concerned instruction.
 		*/
-		ParExeNode* find_wr_stage(ParExeInst* inst) {
+		ParExeNode* findWrSstage(ParExeInst* inst) {
 			for (ParExeInst::NodeIterator node(inst); node(); node++) {
 					if (node->stage() == stage[WR])
 						return *node;
@@ -338,25 +338,25 @@ namespace otawa { namespace xilinx {
 			
 			    inst: Instruction decode.
 		*/
-		xilinx_r5_time_t* get_inst_cycle_timing_info(Inst* inst) {
+		xilinx_r5_time_t* getInstCycleTiming(Inst* inst) {
 			void* inst_info = info->decode(inst);
 			xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
 			info->free(inst_info);
 			return inst_cycle_timing;
 		}
 
-		t::uint32 get_inst_n_reg(Inst* inst) {
+		t::uint32 getInstNReg(Inst* inst) {
 			void* inst_info = info->decode(inst);
-			t::uint32 inst_n_reg = xilinx_r5_n_reg(inst_info);
+			t::uint32 inst_n_reg = armV7_NReg(inst_info);
 			info->free(inst_info);
 			return inst_n_reg;
 		}
 
-		ot::time get_cost_of_mem_access(Inst* inst) { // TODO: not good enough
-			xilinx_r5_time_t* inst_ct = get_inst_cycle_timing_info(inst);
+		ot::time getCostOfMemAccess(Inst* inst) { // TODO: not good enough
+			xilinx_r5_time_t* inst_ct = getInstCycleTiming(inst);
 			bool write = inst_ct->flags & STORE;
 			const hard::Bank* bank = mem->get(inst->address());
-			return ot::time(OCM_ACCESS_LATENCY * get_inst_n_reg(inst));
+			return ot::time(OCM_ACCESS_LATENCY * getInstNReg(inst));
 		}
 
 

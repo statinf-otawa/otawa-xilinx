@@ -15,12 +15,12 @@ typedef void (*fun_t)($(proc)_inst_t* inst);
 
 /*** function definition ***/
 
-static void xilinx_r5_op_UNKNOWN($(proc)_inst_t* inst) {
+static void armV7_op_UNKNOWN($(proc)_inst_t* inst) {
 	SET_OP(1);
 }
 
 $(foreach instructions)
-static void xilinx_r5_op_$(IDENT)($(proc)_inst_t* inst) {
+static void armV7_op_$(IDENT)($(proc)_inst_t* inst) {
 	$(arm7_op)
 };
 
@@ -29,15 +29,15 @@ $(end)
 
 /*** function table ***/
 static fun_t n_op_funs[] = {
-	xilinx_r5_op_UNKNOWN$(foreach instructions),
-	xilinx_r5_op_$(IDENT)$(end)
+	armV7_op_UNKNOWN$(foreach instructions),
+	armV7_op_$(IDENT)$(end)
 };
 
 /**
- * Get the xilinx_r5 op.
- * @return xilinx_r5 op.
+ * Get the armV7 op.
+ * @return armV7 op.
  */
-elm::t::uint32 xilinx_r5_n_reg(void* _inst) {
+elm::t::uint32 armV7_NReg(void* _inst) {
 	arm_inst_t* inst = static_cast<arm_inst_t*>(_inst);
 	n_op_funs[inst->ident](inst);
 	return op_return;
