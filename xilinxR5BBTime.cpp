@@ -26,22 +26,36 @@
 #include <otawa/loader/arm.h>
 #include <elm/io/FileOutput.h>
 #include <elm/data/Vector.h>
-#include "timing.h"
+#include "R5CycleTiming.h"
 #include "armCortexR5_operand.h"
 #define OCM_ACCESS_LATENCY 50
 #define FUs_NUM_STAGE 2
 #undef print
 namespace otawa { namespace xilinx {
+    using namespace elm::io;
 	extern p::id<bool> WRITE_LOG;
-	using namespace elm::io;
+	
+    typedef enum {
+        FE    = 0,
+        DE    = 1,
+        EXE   = 2,
+        WR    = 3,
+        CNT   = 4
+    } pipeline_stage_t;
+
 	
 	class ExeGraph: public etime::EdgeTimeGraph {
 	public:
 		
-		ExeGraph(WorkSpace *ws, ParExeProc *proc, Vector<Resource *> *hw_resources, 
-					ParExeSequence *seq, const PropList &props, FileOutput* out, elm::Vector<Address>* unknown_inst_address) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), 
-																																exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0), _out(out), 
-																																_unknown_inst_address(unknown_inst_address) {
+		ExeGraph(WorkSpace *ws,
+                 ParExeProc *proc, 
+                 Vector<Resource *> *hw_resources, 
+				 ParExeSequence *seq,
+                 const PropList &props,
+                 FileOutput* out, 
+                 elm::Vector<Address>* unknown_inst_address) : etime::EdgeTimeGraph(ws, proc, hw_resources, seq, props), 
+                                                                exec_dpu_fu(0), exec_f_fu(0), exec_lsu_fu(0), _out(out), 
+                                                                _unknown_inst_address(unknown_inst_address) {
 			
 			// Try to find arm loader with arm information
 			DynIdentifier<arm::Info *> id("otawa::arm::Info::ID");
@@ -62,11 +76,11 @@ namespace otawa { namespace xilinx {
 				if (prev_inst && prev_inst->inst()->isControl()) {
 					ot::time delay;
 					if (prev_inst->inst()->topAddress() != inst->inst()->address()) {  
-						if (!prev_inst->inst()->target()) {
+						// if (!prev_inst->inst()->target()) {
 							delay = get_inst_cycle_timing_info(prev_inst->inst())->br_penalty;
 							if (delay >= 2) 
 								new ParExeEdge(prev_inst->lastFUNode(), inst->fetchNode(), ParExeEdge::SOLID, delay - 2, "Branch prediction");
-						}
+						// }
 					}
 				}
 				prev_inst = *inst;
@@ -79,8 +93,10 @@ namespace otawa { namespace xilinx {
 			for (InstIterator inst(this); inst(); inst++) {
 				// get cycle_time_info of inst
 				xilinx_r5_time_t* inst_cycle_timing = get_inst_cycle_timing_info(inst->inst());
-				inst->firstFUNode()->setLatency(inst_cycle_timing->ex_cost - 1);
-				// inst->lastFUNode()->setLatency(inst_cycle_timing->ex_cost / 2);
+				if (inst_cycle_timing->ex_cost > 1)
+                    inst->firstFUNode()->setLatency(inst_cycle_timing->ex_cost - 1);
+                else
+				    inst->lastFUNode()->setLatency(0);
 			}
 		}
 
