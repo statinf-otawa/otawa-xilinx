@@ -2,15 +2,30 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # configuration
 set(SCRIPT	"xilinx")
-set(FILES	"Xilinx/memory_r5f.xml" "Xilinx/pipeline_r5f.xml" "Xilinx/cache_r5f.xml" "Xilinx/bht_r5f.xml")
+set(FILES	
+    "Xilinx/memory_r5f.xml" 
+    "Xilinx/pipeline_r5f.xml" 
+    "Xilinx/cache_r5f.xml" 
+    "Xilinx/bht_r5f.xml"
+    
+    "Xilinx/memory_a9.xml"
+    "Xilinx/pipeline_a9.xml"
+    "Xilinx/cache_a9.xml"
+    "Xilinx/bht_a9.xml"
+)
+
 set(SOURCES
 	hook.cpp
-	xilinxR5BBTime.cpp
-    xilinxA9BBTime.cpp
     preFetchAnalysis.cpp
+    armCortexR5_A9_operand.h
+    
+	xilinxR5BBTime.cpp
     armCortexR5_time.h
-	armCortexR5_operand.h
 	R5CycleTiming.h
+
+    xilinxA9BBTime.cpp
+    armCortexA9_time.h
+    A9CycleTiming.h
 )
 set(ARM_HOME	"${CMAKE_SOURCE_DIR}/../armv7t")
 set(GLISS_HOME 	"${CMAKE_SOURCE_DIR}/../gliss2")
@@ -53,9 +68,16 @@ add_custom_command(
 )
 
 add_custom_command(
-	OUTPUT "armCortexR5_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
+	OUTPUT "armCortexR5_A9_operand.h" DEPENDS "otawa_operand.tpl" "otawa_operand.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o armCortexR5_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
+	ARGS ${IRG} -o armCortexR5_A9_operand.h -a arm7_op -t "otawa_operand.tpl" -d "SET_OP(1);" -e otawa_operand.nmp -p
+	VERBATIM
+)
+
+add_custom_command(
+	OUTPUT "armCortexA9_time.h" DEPENDS "otawa_A9Time.tpl" "otawa_A9Time.nmp" ${IRG}
+	COMMAND ${GLISS_ATTR}
+	ARGS ${IRG} -o armCortexA9_time.h -a cortexA9_time -t "otawa_A9Time.tpl" -d "SET_TIME(time_unknown);" -e otawa_A9Time.nmp -p
 	VERBATIM
 )
 

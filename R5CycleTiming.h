@@ -23,7 +23,7 @@ typedef struct {
 	bool unknown = false;
 } xilinx_r5_time_t;
 
-// TODO: update the cycle timing with floting-point instructions
+// TODO: update the cycle timing with floting-point, SIMD, thumb instructions
 xilinx_r5_time_t time_parallel_data = {1, 1, 1, UNDEFINED, NONE                };
 xilinx_r5_time_t time_data_normal 	= {1, 1, 1, NORMAL_REG, NONE               };
 xilinx_r5_time_t time_data_shift 	= {1, 1, 1, EARLY_REG, NONE                };

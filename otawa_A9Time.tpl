@@ -9,19 +9,19 @@
 extern "C" {
 #endif
 
-xilinx_r5_time_t *time_return;
+xilinx_a9_time_t *time_return;
 typedef void (*fun_t)($(proc)_inst_t *inst);
 #define SET_TIME(x)	time_return = &x
 
 /*** function definition ***/
 
-static void xilinx_r5_time_UNKNOWN($(proc)_inst_t *inst) {
+static void xilinx_a9_time_UNKNOWN($(proc)_inst_t *inst) {
 	SET_TIME(time_unknown);
 }
 
 $(foreach instructions)
-static void xilinx_r5_time_$(IDENT)($(proc)_inst_t *inst) {
-$(cortexR5_time)
+static void xilinx_a9_time_$(IDENT)($(proc)_inst_t *inst) {
+$(cortexA9_time)
 };
 
 $(end)
@@ -29,15 +29,15 @@ $(end)
 
 /*** function table ***/
 static fun_t time_funs[] = {
-	xilinx_r5_time_UNKNOWN$(foreach instructions),
-	xilinx_r5_time_$(IDENT)$(end)
+	xilinx_a9_time_UNKNOWN$(foreach instructions),
+	xilinx_a9_time_$(IDENT)$(end)
 };
 
 /**
- * Get the xilinx_r5 timing.
- * @return xilinx_r5 timing.
+ * Get the xilinx_a9 timing.
+ * @return xilinx_a9 timing.
  */
-xilinx_r5_time_t *xilinxR5Time(void *_inst) {
+xilinx_a9_time_t *xilinxA9Time(void *_inst) {
 	arm_inst_t *inst = static_cast<arm_inst_t *>(_inst);
 	time_funs[inst->ident](inst);
 	return time_return;
