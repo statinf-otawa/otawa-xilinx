@@ -1,3 +1,9 @@
 macro op(x) = "SET_OP"(x)
 extend STM, LDM
 	arm7_op = { op("elm::ones"(reglist)); }
+
+extend LDMDB_thumb2
+    arm7_op = { op("elm::ones"(llist)); }
+
+extend LDM_T2
+    arm7_op = { op("elm::ones"(register_list)); }
