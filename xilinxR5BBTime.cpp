@@ -21,13 +21,12 @@
 #include <otawa/events/StandardEventBuilder.h>
 #include <otawa/etime/EdgeTimeBuilder.h>
 #include <otawa/prop/DynIdentifier.h>
-#include <otawa/dcache/features.h>
 #include <elm/sys/Path.h>
 #include <otawa/loader/arm.h>
 #include <elm/io/FileOutput.h>
 #include <elm/data/Vector.h>
 #include "R5CycleTiming.h"
-#include "armCortexR5_operand.h"
+#include "arm_properties.h"
 #define OCM_ACCESS_LATENCY 50
 #define FUs_NUM_STAGE 2
 
@@ -44,10 +43,10 @@ namespace otawa { namespace xilinx {
     } pipeline_stage_t;
 
 	
-	class ExeGraph: public etime::EdgeTimeGraph {
+	class R5FExeGraph: public etime::EdgeTimeGraph {
 	public:
 		
-		ExeGraph(WorkSpace* ws,
+		R5FExeGraph(WorkSpace* ws,
                  ParExeProc* proc, 
                  Vector<Resource* >* hw_resources, 
 				 ParExeSequence* seq,
@@ -254,20 +253,17 @@ namespace otawa { namespace xilinx {
 				} else if (pipeline_stage->name() == "Decode") {
 					stage[DE] = *pipeline_stage;
 				} else if (pipeline_stage->name() == "EXE") {
-					_microprocessor->setExecStage(*pipeline_stage);
+					// _microprocessor->setExecStage(*pipeline_stage);
 					stage[EXE] = *pipeline_stage;
 					for (int i = 0; i < pipeline_stage->numFus(); i++) {
-						ParExePipeline *fu = pipeline_stage->fu(i);
+						ParExePipeline* fu = pipeline_stage->fu(i);
 						if (fu->firstStage()->name().startsWith("EXEC_F")) {
 							exec_f_fu = fu;
-						}
-						else if (fu->firstStage()->name().startsWith("EXEC_DPU")) {
+						} else if (fu->firstStage()->name().startsWith("EXEC_DPU")) {
 							exec_dpu_fu = fu;
-						}
-						else if (fu->firstStage()->name().startsWith("EXEC_LSU")) {
+						} else if (fu->firstStage()->name().startsWith("EXEC_LSU")) {
 							exec_lsu_fu = fu;
-						}
-						else
+						} else
 							ASSERTP(false, fu->firstStage()->name());
 						
 					}
@@ -340,7 +336,7 @@ namespace otawa { namespace xilinx {
 		*/
 		xilinx_r5_time_t* getInstCycleTiming(Inst* inst) {
 			void* inst_info = info->decode(inst);
-			xilinx_r5_time_t* inst_cycle_timing = xilinx_r5_time(inst_info);
+			xilinx_r5_time_t* inst_cycle_timing = xilinxR5Time(inst_info);
 			info->free(inst_info);
 			return inst_cycle_timing;
 		}
@@ -379,13 +375,14 @@ namespace otawa { namespace xilinx {
 			const hard::CacheConfiguration* cache_config = hard::CACHE_CONFIGURATION_FEATURE.get(ws);
 			if (!cache_config)
 				throw ProcessorException(*this, "no cache");
-			dcache = cache_config->dataCache();
-			if (!dcache)
+
+			if (!cache_config->hasDataCache())
 				throw ProcessorException(*this, "no data cache");
-			icache = cache_config->instCache();
-			if (!icache)
+
+			if (!cache_config->hasInstCache())
 				throw ProcessorException(*this, "no instruction cache");
-			if (dcache == icache)
+
+			if (cache_config->isUnified())
 				throw ProcessorException(*this, "unified L1 cache not supported");
 			if (write_log) {
 				sys::Path log_file_path = sys::Path(ws->process()->program()->name() + ".log");
@@ -405,7 +402,7 @@ namespace otawa { namespace xilinx {
 		}
 
 		etime::EdgeTimeGraph* make(ParExeSequence* seq) override {
-			ExeGraph* graph = new ExeGraph(workspace(), _microprocessor, ressources(), seq, _props, log_stream, unknown_inst_address);
+			R5FExeGraph* graph = new R5FExeGraph(workspace(), _microprocessor, ressources(), seq, _props, log_stream, unknown_inst_address);
 			graph->build();
 			return graph;
 		}
@@ -417,8 +414,6 @@ namespace otawa { namespace xilinx {
 		}
 	private:
 		PropList _props;
-		const hard::Cache *dcache, *icache;
-		hard::Memory* mem;
 		FileOutput* log_stream = nullptr;
 		bool write_log = 0;
 		elm::Vector<Address>* unknown_inst_address = nullptr;
