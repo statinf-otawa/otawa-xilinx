@@ -18,6 +18,7 @@ set(SOURCES
 	hook.cpp
     preFetchAnalysis.cpp
     armCortexR5_A9_operand.h
+    arm_properties.h
     
 	xilinxR5BBTime.cpp
     armCortexR5_time.h
@@ -63,7 +64,7 @@ message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 add_custom_command(
 	OUTPUT "armCortexR5_time.h" DEPENDS "otawa_R5Time.tpl" "otawa_R5Time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o armCortexR5_time.h -a cortexR5_time -t "otawa_R5Time.tpl" -d "SET_TIME(time_unknown);" -e otawa_R5Time.nmp -p
+	ARGS ${IRG} -o armCortexR5_time.h -a cortexR5_time -t "otawa_R5Time.tpl" -d "SET_TIME(R5_time_unknown);" -e otawa_R5Time.nmp -p
 	VERBATIM
 )
 
@@ -77,7 +78,7 @@ add_custom_command(
 add_custom_command(
 	OUTPUT "armCortexA9_time.h" DEPENDS "otawa_A9Time.tpl" "otawa_A9Time.nmp" ${IRG}
 	COMMAND ${GLISS_ATTR}
-	ARGS ${IRG} -o armCortexA9_time.h -a cortexA9_time -t "otawa_A9Time.tpl" -d "SET_TIME(time_unknown);" -e otawa_A9Time.nmp -p
+	ARGS ${IRG} -o armCortexA9_time.h -a cortexA9_time -t "otawa_A9Time.tpl" -d "SET_TIME(A9_time_unknown);" -e otawa_A9Time.nmp -p
 	VERBATIM
 )
 

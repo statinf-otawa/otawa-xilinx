@@ -5,25 +5,32 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-canon int(32) "time_mov_normal"
-canon int(32) "time_mov_reg_shift"
-canon int(32) "time_mov_imm_shift"
-canon int(32) "time_simpl_data_normal"
-canon int(32) "time_simpl_data_imm_shift"
-canon int(32) "time_simpl_data_reg_shift"
-canon int(32) "time_huge_data_normal"
-canon int(32) "time_huge2_data_normal"
-canon int(32) "time_ussat_data_normal"
-canon int(32) "time_ussat16_data_normal"
-canon int(32) "time_pkhtb_pkhbt_data_normal"
-canon int(32) "time_su_data_normal"
-canon int(32) "time_usxtb_data_normal"
-canon int(32) "time_usxtab_data_normal"
-canon int(32) "time_ubbfx_data_normal"
-canon int(32) "time_other_data_normal"
-canon int(32) "time_single_ldr"
-canon int(32) "time_single_ldrb_ldrh"
-canon int(32) "time_multiple_ldr"
+canon int(32) "A9_time_mov_normal"
+canon int(32) "A9_time_mov_reg_shift"
+canon int(32) "A9_time_mov_imm_shift"
+canon int(32) "A9_time_simpl_data_normal"
+canon int(32) "A9_time_simpl_data_imm_shift"
+canon int(32) "A9_time_simpl_data_reg_shift"
+canon int(32) "A9_time_huge_data_normal"
+canon int(32) "A9_time_huge2_data_normal"
+canon int(32) "A9_time_ussat_data_normal"
+canon int(32) "A9_time_ussat16_data_normal"
+canon int(32) "A9_time_pkhtb_pkhbt_data_normal"
+canon int(32) "A9_time_pkhtb_pkhbt"
+canon int(32) "A9_time_su_data_normal"
+canon int(32) "A9_time_usxtb_data_normal"
+canon int(32) "A9_time_usxtab_data_normal"
+canon int(32) "A9_time_ubbfx_data_normal"
+canon int(32) "A9_time_other_data_normal"
+canon int(32) "A9_time_single_ldr"
+canon int(32) "A9_time_single_ldrb_ldrh"
+canon int(32) "A9_time_multiple_ldr"
+canon int(32) "A9_time_single_str"
+canon int(32) "A9_time_single_strb_strh"
+canon int(32) "A9_time_multiple_str"
+canon int(32) "A9_time_simple_mult"
+canon int(32) "A9_time_mul_x"
+canon int(32) "A9_time_branch"
 
 macro time(x) = "SET_TIME"(x)
 
@@ -38,28 +45,28 @@ extend immShift
 // B.2     Data-processing instructions
 
 extend  MOV_imm, MOV_imm_T2, MOV_imm_thumb
-    cortexA9_time = { time("time_mov_normal"); }
+    cortexA9_time = { time("A9_time_mov_normal"); }
 
 extend  MOV_shr
     cortexA9_time = {
         if shifter_operand.reg_shift then
-            time("time_mov_reg_shift"); 
+            time("A9_time_mov_reg_shift"); 
         else 
-            time("time_mov_imm_shift"); 
+            time("A9_time_mov_imm_shift"); 
         endif;
     }
 
 extend  AND_imm, EOR_imm, SUB_imm, RSB_imm, ADD_imm, ADC_imm, SBC_imm, 
         RSC_imm, CMN_imm, ORR_imm, BIC_imm, MVN_imm, TST_imm, TEQ_imm, CMP_imm
-    cortexA9_time = { time("time_simpl_data_normal"); }
+    cortexA9_time = { time("A9_time_simpl_data_normal"); }
 
 extend  AND_shr, EOR_shr, SUB_shr, RSB_shr, ADD_shr, ADC_shr, SBC_shr, 
         RSC_shr, CMN_shr, ORR_shr, BIC_shr, MVN_shr, TST_shr, TEQ_shr, CMP_shr
     cortexA9_time = {
         if shifter_operand.reg_shift then
-                time("time_simpl_data_reg_shift"); 
+                time("A9_time_simpl_data_reg_shift"); 
             else 
-                time("time_simpl_data_imm_shift"); 
+                time("A9_time_simpl_data_imm_shift"); 
             endif;
     }
 
@@ -67,98 +74,98 @@ extend  QADD_thumb2, QSUB_thumb2, QADD8_thumb2, QADD16_thumb2, QSUB8_thumb2, QSU
         SHADD8_thumb2, SHADD16_thumb2, SHSUB8_thumb2, SHSUB16_thumb2, UQADD8_thumb2, UQADD16_thumb2,
         UQSUB8_thumb2, UQSUB16_thumb2, UHADD8_thumb2, UHADD16_thumb2, UHSUB8_thumb2, UHSUB16_thumb2,
         QASX_thumb2, QSAX_thumb2, SHASX_thumb2, SHSAX_thumb2, UQASX_thumb2, UQSAX_thumb2, UHASX_thumb2, UHSAX_thumb2
-    cortexA9_time = { time("time_huge_data_normal"); }
+    cortexA9_time = { time("A9_time_huge_data_normal"); }
 
 
 extend  QDADD_thumb2, QDSUB_thumb2
-    cortexA9_time = { time("time_huge2_data_normal"); }
+    cortexA9_time = { time("A9_time_huge2_data_normal"); }
 
 extend  USAT_USAT16_thumb2, SSAT_SSAT16_thumb2
     cortexA9_time = {
         if (imm3::imm2 == 0b00000) && (sh == 0b1) then
-            time("time_ussat16_data_normal");
+            time("A9_time_ussat16_data_normal");
         else
-            time("time_ussat_data_normal");
+            time("A9_time_ussat_data_normal");
         endif;
     }
 
 extend  PKHBT_PKHTB_thumb2
-    cortexA9_time = { time("time_pkhtb_pkhbt"); }
+    cortexA9_time = { time("A9_time_pkhtb_pkhbt"); }
 
 extend  SADD8_thumb2, SADD16_thumb2, SSUB8_thumb2, SSUB16_thumb2, UADD8_thumb2, UADD16_thumb2, 
         SSUB8_thumb2, SSUB16_thumb2, SASX_thumb2, SSAX_thumb2, UASX_thumb2, USAX_thumb2
-    cortexA9_time = { time("time_su_data_normal"); }
+    cortexA9_time = { time("A9_time_su_data_normal"); }
 
 extend  SXTAB_SXTB_thumb2, SXTAB16_SXTB16_thumb2, SXTAH_SXTH_thumb2, 
         UXTAB16_UXTB16_thumb2, UXTAH_UXTH_thumb2
     cortexA9_time = { 
         if (rn.number == 0b1111) then
-            time("time_usxtb_data_normal");
+            time("A9_time_usxtb_data_normal");
         else
-            time("time_usxtab_data_normal");
+            time("A9_time_usxtab_data_normal");
         endif;
     }
 
 extend  UXTB_T1
-    cortexA9_time = { time("time_usxtb_data_normal"); }
+    cortexA9_time = { time("A9_time_usxtb_data_normal"); }
 
 extend  UXTAB_T1
     cortexA9_time = {
         if Rn.number == 0b1111 then
-            time("time_usxtb_data_normal");
+            time("A9_time_usxtb_data_normal");
         else
-            time("time_usxtab_data_normal");
+            time("A9_time_usxtab_data_normal");
         endif;
     }
 
 extend  BFC_BFI_thumb2, UBFX_T1, SBFX_thumb2
-    cortexA9_time = { time("time_ubbfx_data_normal"); }
+    cortexA9_time = { time("A9_time_ubbfx_data_normal"); }
 
 
 extend  CLZ_T1, CLZ_thumb2, MOVT_thumb2, MOVT, MOVT_T1, MOVW_imm, RBIT_thumb2,
         REV_thumb2, REV16_thumb2, REV_thumb, REV16_thumb, REVSH_thumb2, REVSH_thumb,
         MSR_imm, MSR_shr
-    cortexA9_time = { time("time_other_data_normal"); }
+    cortexA9_time = { time("A9_time_other_data_normal"); }
 
 
 
 // B.3      Load and Store instructions
 
 extend   LDR_imm, LDR_shr, LDR_reg_Thumb, LDR_imm_thumb, LDR_imm2_thumb, LDR_imm3_thumb, LDR_shr_thumb
-    cortexA9_time = { time("time_single_ldr"); }
+    cortexA9_time = { time("A9_time_single_ldr"); }
 
 extend   LDRB_imm_thumb, LDRB_shr_thumb, LDRB_imm_T2, LDRB_reg, LDRB_reg_T2,
          LDRH_imm, LDRH_shr, LDRH_reg, LDRH_reg_T2, LDRH_imm_Thumb_T2, LDRH_imm_Thumb
-    cortexA9_time = { time("time_single_ldrb_ldrh"); }
+    cortexA9_time = { time("A9_time_single_ldrb_ldrh"); }
 
 extend   LDM, LDM_T2, LDMDB_thumb2
-    cortexA9_time = { time("time_multiple_ldr"); }
+    cortexA9_time = { time("A9_time_multiple_ldr"); }
 
 extend   STR_imm, STR_shr, STR_imm, STRH_shr, STR_reg_Thumb, STR_reg_T2
-	cortexA9_time = { time("time_single_str"); }
+	cortexA9_time = { time("A9_time_single_str"); }
 
 extend   STM, STMDB_T1
-    cortexA9_time = { time("time_multiple_str"); }
+    cortexA9_time = { time("A9_time_multiple_str"); }
 
 extend   STRB_reg, STRB_reg_T2, STRB_imm_T2, STRB_imm_thumb, STRB_shr_thumb,
          STRH_imm, STRH_shr, STRH_reg, STRH_reg_T2, STRH_imm_Thumb_T2
-    cortexA9_time = { time("time_single_strb_strh"); }
+    cortexA9_time = { time("A9_time_single_strb_strh"); }
 
 
 
 // B.4      Multiplication instrucions
 
 extend   MUL, MLA
-	cortexA9_time = { time("time_simple_mult"); }
+	cortexA9_time = { time("A9_time_simple_mult"); }
 
 extend   SMLAL, SMULL, UMULL, UMLAL, SMULL_thumb2, UMAAL_thumb2,
          SMLALD_thumb2, SMLAL_thumb2, SMLALD_thumb2, SMLALBB_thumb2,
          SMMLA_SMMUL_thumb2, SMMLS_thumb2
-    cortexA9_time = { time("time_mul_x"); }
+    cortexA9_time = { time("A9_time_mul_x"); }
 
 
 
 // B.5      Branch instrucions
 
 extend B_Cond, SWI, BX_ARM
-	cortexA9_time = { time("time_branch"); }
+	cortexA9_time = { time("A9_time_branch"); }
