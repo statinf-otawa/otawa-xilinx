@@ -19,15 +19,19 @@
  *	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
- #include <otawa/proc/ProcessorPlugin.h>
+#include <otawa/proc/ProcessorPlugin.h>
+#include "arm_properties.h"
 
- namespace otawa { namespace xilinx {
+namespace otawa { namespace xilinx {
 
     class Plugin: public ProcessorPlugin {
     public:
         Plugin(void): ProcessorPlugin("otawa::xilinx", Version(1, 0, 0), OTAWA_PROC_VERSION) { }
     };
-
+    /**
+	* This configuration property allows the know if the log is required.
+	*/
+	p::id<bool> WRITE_LOG("otawa::xilinx::WRITE_LOG", 0);
 }
 }
 
