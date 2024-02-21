@@ -5,8 +5,8 @@ This implementation attempts to support the WCET computation for:
     - Xilinx Zynq 7000
 
 ===== TODO =====
-
-    
+    ===> TCM for A9 ?, DDR RAM ?
+    ===> OOO ?
 
 ==== Main reference (to be updated) =====
 
