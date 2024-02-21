@@ -69,11 +69,11 @@
 					<arch>armv7-r</arch>
 					<mach>Zynq UltraScale+ MPSoC, Arm cortex R5F</mach>
 				</xsl:when>
-				<!-- <xsl:when test="$ARCH=1">
+				<xsl:when test="$ARCH=1">
 					<arch>armv7-a</arch>
 					<mach>Zynq-7000</mach>
 				</xsl:when>
-				<xsl:when test="$ARCH=2">
+				<!-- <xsl:when test="$ARCH=2">
 					<arch>armv8-a</arch>
 					<mach>Zynq UltraScale+ MPSoC, Arm cortex A53</mach>
 				</xsl:when> -->
@@ -89,13 +89,13 @@
 				<xi:include href="Xilinx/memory_r5f.xml"/>
 				<xi:include href="Xilinx/bht_r5f.xml"/>
 			</xsl:when>
-			<!-- <xsl:when test="$ARCH=1">
+			<xsl:when test="$ARCH=1">
 				<xi:include href="Xilinx/pipeline_a9.xml"/>
 				<xi:include href="Xilinx/cache_a9.xml"/>
 				<xi:include href="Xilinx/memory_a9.xml"/>
 				<xi:include href="Xilinx/bht_a9.xml"/>
 			</xsl:when>
-			<xsl:when test="$ARCH=2">
+			<!-- <xsl:when test="$ARCH=2">
 				<xi:include href="Xilinx/pipeline_a53.xml"/>
 				<xi:include href="Xilinx/cache_a53.xml"/>
 				<xi:include href="Xilinx/memory_r5f.xml"/>
@@ -112,8 +112,9 @@
 				<xsl:if test="$EPG!=0">
 					<config name="otawa::GRAPHS_OUTPUT_DIRECTORY" value="ParExeGraph"/>
 				</xsl:if>
-				
+                <config name="otawa::xilinx::WRITE_LOG" value="{$LOG}"/>
 				<config name="otawa::ipet::EXPLICIT" value="true"/>
+
 				<step processor="otawa::Virtualizer"/>
 
 				<step require="otawa::ICACHE_CATEGORY2_FEATURE"/>
@@ -128,10 +129,18 @@
 				<step require="otawa::dcache::MULTI_PERS_FEATURE"/>
 				<step require="otawa::dcache::CATEGORY_FEATURE"/>
 				<step require="otawa::dcache::EVENTS_FEATURE"/>
-
-                <step processor="otawa::xilinx::BBTimerXilinxR5"> 
-					<config name="otawa::xilinx::WRITE_LOG" value="{$LOG}"/>
-				</step>
+                <xsl:choose>
+                    <xsl:when test="$ARCH=0">
+                        <step processor="otawa::xilinx::BBTimerXilinxR5"/>
+                    </xsl:when>
+                    <xsl:when test="$ARCH=1">
+                        <step processor="otawa::xilinx::BBTimerXilinxA9"/>
+                    </xsl:when>
+                    <!-- <xsl:when test="$ARCH=2">
+                        <step processor="otawa::xilinx::BBTimerXilinxA53"/>
+                    </xsl:when> -->
+                </xsl:choose>
+            
 				<step require="otawa::ipet::WCET_FEATURE"/>	
 			</xsl:when>
 			<xsl:otherwise>
