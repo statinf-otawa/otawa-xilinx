@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-elm::t::uint32 op_return;
+static elm::t::uint32 op_return;
 typedef void (*fun_t)($(proc)_inst_t* inst);
 #define SET_OP(x)	op_return = x
 
@@ -37,7 +37,7 @@ static fun_t n_op_funs[] = {
  * Get the armV7 op.
  * @return armV7 op.
  */
-elm::t::uint32 armV7_NReg(void* _inst) {
+static elm::t::uint32 armV7_NReg(void* _inst) {
 	arm_inst_t* inst = static_cast<arm_inst_t*>(_inst);
 	n_op_funs[inst->ident](inst);
 	return op_return;
