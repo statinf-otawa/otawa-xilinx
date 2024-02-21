@@ -17,8 +17,8 @@ set(FILES
 set(SOURCES
 	hook.cpp
     preFetchAnalysis.cpp
-    armCortexR5_A9_operand.h
     arm_properties.h
+    armCortexR5_A9_operand.h
     
 	xilinxR5BBTime.cpp
     armCortexR5_time.h
