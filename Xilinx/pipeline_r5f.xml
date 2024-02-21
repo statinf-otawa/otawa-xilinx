@@ -60,7 +60,7 @@
 			<name>Write</name>
 			<type>COMMIT</type>
 			<width>2</width>
-			<latency>0</latency>
+			<!-- <latency>0</latency> -->
 			<mem>true</mem>
 		</stage>
 	</stages>

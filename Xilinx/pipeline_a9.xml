@@ -23,26 +23,32 @@
 			<name>Fetch</name>
 			<type>FETCH</type>
             <latency>3</latency>
+            <width>2</width>
 		</stage>
         <stage id="IQ">
 			<name>IQ</name>
 			<type>LAZY</type>
+            <width>2</width>
 		</stage>
 		<stage id="DE">
 			<name>Decode</name>
 			<type>LAZY</type>
+            <width>2</width>
 		</stage>
 		<stage id="REGR"> <!-- Register rename stage -->
 			<name>RegR</name>
 			<type>LAZY</type>
+            <width>2</width>
 		</stage>
 		<stage id="DIS"> <!-- Dispatch stage -->
 			<name>DISPATCH</name>
 			<type>LAZY</type>
+            <width>2</width>
 		</stage>
 		<stage id="EXE">
 			<name>EXE</name>
 			<type>EXEC</type>
+            
 			<fus>
 				<fu id="EXEC_F"> <!-- FPU / NEON  -->
 					<name>EXEC_F</name>
@@ -54,6 +60,7 @@
 					<name>EXEC_ALU_MUL</name>
 					<latency>2</latency> <!-- doc: 7, 203 -->
 					<pipelined>true</pipelined>
+                    <width>2</width>
 				</fu>
 				<!-- <fu id="EXEC_ALU"> 198
 					<name>EXEC_ALU</name>
@@ -70,9 +77,7 @@
 			<dispatch>
 				<inst> <type>IS_MEM|IS_LOAD|IS_STORE</type> <fu ref="EXEC_LDST"/> </inst>
 				<inst> <type>IS_FLOAT</type> <fu ref="EXEC_F"/> </inst>
-				<!-- <inst> <type>IS_MUL</type> <fu ref="EXEC_ALU_MUL"/> </inst> -->
 				<inst> <type>IS_SPECIAL</type> <fu ref="EXEC_F"/> </inst>
-				<!-- <inst> <type></type> <fu ref="EXEC_ALU"/> </inst> -->
                 <inst> <type></type> <fu ref="EXEC_ALU_MUL"/> </inst>
 			</dispatch>
 		</stage>
@@ -80,6 +85,7 @@
 			<name>WB</name>
 			<type>COMMIT</type>
             <mem>true</mem>
+            <width>2</width>
 		</stage>
 	</stages>
 </processor>
