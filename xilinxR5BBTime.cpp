@@ -26,13 +26,15 @@
 #include <elm/io/FileOutput.h>
 #include <elm/data/Vector.h>
 #include "R5CycleTiming.h"
+#include "armCortexR5_A9_operand.h"
 #include "arm_properties.h"
+
 #define OCM_ACCESS_LATENCY 50
 #define FUs_NUM_STAGE 2
 
 namespace otawa { namespace xilinx {
     using namespace elm::io;
-	extern p::id<bool> WRITE_LOG;
+	// extern p::id<bool> WRITE_LOG;
 	
     typedef enum {
         FE    = 0,
@@ -427,11 +429,5 @@ namespace otawa { namespace xilinx {
 										.maker<BBTimerXilinxR5>();
 	
 
-	/**
-	* This configuration property allows the know if the log is required.
-	*/
-	p::id<bool> WRITE_LOG("otawa::xilinx::WRITE_LOG", 0);
-
 } // namespace xilinx
 } // namespace otawa
-
