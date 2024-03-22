@@ -64,10 +64,10 @@ extend  AND_shr, EOR_shr, SUB_shr, RSB_shr, ADD_shr, ADC_shr, SBC_shr,
         RSC_shr, CMN_shr, ORR_shr, BIC_shr, MVN_shr, TST_shr, TEQ_shr, CMP_shr
     cortexA9_time = {
         if shifter_operand.reg_shift then
-                time("A9_time_simpl_data_reg_shift"); 
-            else 
-                time("A9_time_simpl_data_imm_shift"); 
-            endif;
+            time("A9_time_simpl_data_reg_shift"); 
+        else 
+            time("A9_time_simpl_data_imm_shift"); 
+        endif;
     }
 
 extend  QADD_thumb2, QSUB_thumb2, QADD8_thumb2, QADD16_thumb2, QSUB8_thumb2, QSUB16_thumb2,
