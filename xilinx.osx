@@ -42,7 +42,7 @@
 					0: arm cortex R5F (arm v7-R) or 
 					1: arm cortex A9 (arm v7-A) or
 					2: arm cortex A53 (arm v8-A).
-					WARNING: 1 and 2 options are not supported yet.
+					WARNING: option 2 is not supported yet.
 				</help>
 				<value label="arm cortex R5 (arm v7-R)" value="0" default="true"/>
 				<value label="arm cortex A9 (arm v7-A)" value="1"/>
