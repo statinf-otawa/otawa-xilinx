@@ -12,7 +12,7 @@ const t::uint32
 	MULTI = 0x01, // Not needed for now. gliss2|nmp file should maybe be updated first.
 	LOAD  = 0x02,
 	STORE = 0x04,
-	SWP   = 0x10; // TODO: doc about this : URGENT
+	SWP   = 0x10;
 
 typedef struct {
 	int ex_cost; // Is "cycle" value in Arm cortexr5_trm, page 425. 
@@ -44,5 +44,5 @@ xilinx_r5_time_t R5_time_branch_x	    = {1, 1, 9, UNDEFINED, NONE               
 xilinx_r5_time_t R5_time_tbb_tbh        = {9, 9, 9, UNDEFINED, NONE                };
 xilinx_r5_time_t R5_time_mult	 		= {2, 3, 1, EARLY_REG, NONE                };
 xilinx_r5_time_t R5_time_mult_long		= {2, 3, 1, EARLY_REG, NONE                };
-xilinx_r5_time_t R5_time_unknown 		= {15, 15, 15, VERY_EARLY_REG, NONE, true  };
+xilinx_r5_time_t R5_time_unknown 		= {25, 25, 15, VERY_EARLY_REG, NONE, true  };
 #include "armCortexR5_time.h"
