@@ -30,5 +30,5 @@ xilinx_a9_time_t A9_time_single_strb_strh      = {2, 5};
 xilinx_a9_time_t A9_time_simple_mult           = {2, 4};
 xilinx_a9_time_t A9_time_mul_x                 = {3, 5};
 xilinx_a9_time_t A9_time_branch                = {5, 5}; // This is overestimated because, the doc has not provided explicit information about cycle timing of branch instructions
-xilinx_a9_time_t A9_time_unknown 		       = {15, 15, true};
+xilinx_a9_time_t A9_time_unknown 		       = {25, 25, true};
 #include "armCortexA9_time.h"

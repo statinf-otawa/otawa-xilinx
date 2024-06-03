@@ -108,7 +108,7 @@ namespace otawa { namespace xilinx {
 			for (InstIterator inst(this); inst(); inst++) {
 				ot::time cost = getInstExCost(inst->inst());
 				if (cost > 1)
-                    inst->firstFUNode()->setLatency(cost - 1);
+                    inst->firstFUNode()->setLatency(cost);
                 else
 				    inst->lastFUNode()->setLatency(0);
 			}
