@@ -107,6 +107,9 @@
             <on_chip>true</on_chip>
             <writable>true</writable>
             <cachable>true</cachable>
+            <write_latency>100</write_latency>
+            <read_latency>100</read_latency>
+            <latency>100</latency>
         </bank>
 
 
@@ -156,6 +159,9 @@
             <on_chip>true</on_chip>
             <writable>true</writable>
             <cachable>true</cachable>
+            <write_latency>100</write_latency>
+            <read_latency>100</read_latency>
+            <latency>100</latency>
         </bank>
 
     </banks>
