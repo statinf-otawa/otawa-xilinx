@@ -65,6 +65,9 @@
             <address><offset>0xF8880000</offset></address>
             <size>0x10000</size> <!-- 64 Kbytes -->
             <type>ROM</type> <!-- Same as bank 0 -->
+            <write_latency>50</write_latency>
+            <read_latency>50</read_latency>
+            <latency>50</latency>
         </bank>
     </banks>
 </memory>
