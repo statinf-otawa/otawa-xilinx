@@ -32,7 +32,7 @@
 				</help>
 			</item>
 	
-			<item name="LAV" type="bool" default="false" label="Use Local Adress View">
+			<item name="LAV" type="bool" default="true" label="Use Local Adress View">
 				<help>By setting this to true, The memory space desciption will use Core Local View to define the address of the memomry banks. If not set, the global address view will be used.
 				</help>
 			</item>
